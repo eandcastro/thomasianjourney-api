@@ -16,7 +16,7 @@ export class EventController {
   constructor(private readonly eventService: EventService) {}
 
   @Post()
-  create(@Body() createEventDto: CreateEventDto) {
+  create(@Body() createEventDto?: CreateEventDto) {
     return this.eventService.create(createEventDto);
   }
 

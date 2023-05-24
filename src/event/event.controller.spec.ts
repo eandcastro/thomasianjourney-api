@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventController } from './event.controller';
 import { EventService } from './event.service';
+import { getRepositoryToken } from '@mikro-orm/nestjs';
+import { Event } from './entities/event.entity';
 
 describe('EventController', () => {
   let controller: EventController;
@@ -8,7 +10,13 @@ describe('EventController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [EventController],
-      providers: [EventService],
+      providers: [
+        EventService,
+        {
+          provide: getRepositoryToken(Event),
+          useFactory: jest.fn(),
+        },
+      ],
     }).compile();
 
     controller = module.get<EventController>(EventController);

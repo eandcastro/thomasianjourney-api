@@ -1,1 +1,8 @@
-export class Student {}
+import { Entity, ManyToMany, Property } from '@mikro-orm/core';
+import { BaseEntity } from '../../base.entity';
+
+@Entity()
+export class Student extends BaseEntity {
+  @Property()
+  studentName!: string;
+}

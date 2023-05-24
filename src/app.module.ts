@@ -4,9 +4,17 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { EventModule } from './event/event.module';
 import { StudentModule } from './student/student.module';
-
+import mikroOrmConfig from './mikro-orm.config';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { ConfigModule } from '@nestjs/config';
 @Module({
-  imports: [UserModule, EventModule, StudentModule],
+  imports: [
+    MikroOrmModule.forRoot(mikroOrmConfig),
+    ConfigModule.forRoot(),
+    UserModule,
+    EventModule,
+    StudentModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
