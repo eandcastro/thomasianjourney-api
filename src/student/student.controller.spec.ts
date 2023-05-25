@@ -3,9 +3,18 @@ import { StudentController } from './student.controller';
 import { StudentService } from './student.service';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { Student } from './entities/student.entity';
+import { ValidationPipe } from '@nestjs/common';
 
 describe('StudentController', () => {
   let controller: StudentController;
+
+  const mockStudentService = {
+    create: jest.fn(() => {
+      return {
+        message: 'success',
+      };
+    }),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -17,7 +26,12 @@ describe('StudentController', () => {
           useFactory: jest.fn(),
         },
       ],
-    }).compile();
+    })
+      .overrideProvider(StudentService)
+      .useValue(mockStudentService)
+      .overridePipe(ValidationPipe)
+      .useClass(new ValidationPipe())
+      .compile();
 
     controller = module.get<StudentController>(StudentController);
   });

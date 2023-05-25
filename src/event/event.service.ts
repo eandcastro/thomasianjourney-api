@@ -52,7 +52,7 @@ export class EventService {
   }
 
   async findOne(id: string, where: FilterQuery<Event> = {}) {
-    this.logger.log(`Updating Event ID: ${id}`);
+    this.logger.log(`Finding Event ID: ${id}`);
 
     const existingEvent = await this.em.findOne(
       Event,

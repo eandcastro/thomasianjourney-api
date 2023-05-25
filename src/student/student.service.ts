@@ -1,21 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
-import { InjectRepository } from '@mikro-orm/nestjs';
 import { Student } from './entities/student.entity';
-import { EntityRepository } from '@mikro-orm/core';
+import { FilterQuery, wrap } from '@mikro-orm/core';
+import { EntityManager } from '@mikro-orm/postgresql';
 
 @Injectable()
 export class StudentService {
+  private readonly logger = new Logger(StudentService.name);
   constructor(
-    @InjectRepository(Student)
-    private readonly studentRepository: EntityRepository<Student>,
+    // @InjectRepository(Student)
+    // private readonly studentRepository: EntityRepository<Student>,
+    private readonly em: EntityManager,
   ) {}
 
   async create(createStudentDto: CreateStudentDto) {
     const newStudent = new Student();
 
-    // newStudent.id = 1;
     newStudent.student_name = createStudentDto.student_name;
     newStudent.student_email = createStudentDto.student_email;
     newStudent.student_college_name = createStudentDto.student_college_name;
@@ -24,24 +25,59 @@ export class StudentService {
     newStudent.student_accumulated_points =
       createStudentDto.student_accumulated_points;
 
-    await this.studentRepository.upsert(newStudent);
+    this.logger.log(`Creating new student: ${JSON.stringify(newStudent)}`);
 
-    return 'This action adds a new student';
+    const createStudent = this.em.create(Student, newStudent);
+    await this.em.upsert(createStudent);
+    await this.em.flush();
+
+    return {
+      message: 'success',
+    };
   }
 
-  findAll() {
-    return `This action returns all student`;
+  async findAll(where: FilterQuery<Student> = {}) {
+    const students = await this.em.find(Student, where, {});
+    return students;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} student`;
+  async findOne(id: number, where: FilterQuery<Student> = {}) {
+    this.logger.log(`Finding Student ID: ${id}`);
+
+    const existingStudent = await this.em.findOne(
+      Student,
+      Object.assign({}, where, { id }),
+      { filters: [] },
+    );
+
+    if (!existingStudent) {
+      throw new BadRequestException('Student ID does not exists', {
+        cause: new Error(),
+        description: 'Student ID does not exists',
+      });
+    }
+
+    return existingStudent;
   }
 
-  update(id: number, updateStudentDto: UpdateStudentDto) {
-    return `This action updates a #${id} student`;
+  async update(id: string, updateStudentDto: UpdateStudentDto) {
+    this.logger.log(`Updating Student ID: ${id}`);
+    const existingStudent = await this.em.findOne(Student, { id }, {});
+
+    if (!existingStudent) {
+      throw new BadRequestException('Student ID does not exists', {
+        cause: new Error(),
+        description: 'Student ID does not exists',
+      });
+    }
+
+    wrap(existingStudent).assign(updateStudentDto);
+    await this.em.persistAndFlush(existingStudent);
+
+    return existingStudent;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} student`;
+  remove(id: string) {
+    return this.em.remove(this.em.getReference(Student, id)).flush();
   }
 }

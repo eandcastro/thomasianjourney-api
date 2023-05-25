@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { EventService } from './event.service';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { Event } from './entities/event.entity';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 
 describe('EventService', () => {
   let service: EventService;
@@ -22,6 +22,12 @@ describe('EventService', () => {
         {
           provide: getRepositoryToken(Event),
           useFactory: jest.fn(),
+        },
+        {
+          provide: Logger,
+          useValue: {
+            log: jest.fn(),
+          },
         },
       ],
     })

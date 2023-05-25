@@ -3,7 +3,6 @@ import { EventController } from './event.controller';
 import { EventService } from './event.service';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { Event } from './entities/event.entity';
-import { CreateEventDto } from './dto/create-event.dto';
 import { ValidationPipe } from '@nestjs/common';
 
 describe('EventController', () => {
