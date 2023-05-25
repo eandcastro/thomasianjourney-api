@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { validate as uuidValidate, version as uuidVersion } from 'uuid';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { Student } from './entities/student.entity';
@@ -41,7 +42,14 @@ export class StudentService {
     return students;
   }
 
-  async findOne(id: number, where: FilterQuery<Student> = {}) {
+  async findOne(id: string, where: FilterQuery<Student> = {}) {
+    if (!uuidValidate(id) || uuidVersion(id) !== 4) {
+      throw new BadRequestException('Invalid student ID', {
+        cause: new Error(),
+        description: 'Student ID is not a v4 uuid',
+      });
+    }
+
     this.logger.log(`Finding Student ID: ${id}`);
 
     const existingStudent = await this.em.findOne(
@@ -61,7 +69,15 @@ export class StudentService {
   }
 
   async update(id: string, updateStudentDto: UpdateStudentDto) {
+    if (!uuidValidate(id) || uuidVersion(id) !== 4) {
+      throw new BadRequestException('Invalid student ID', {
+        cause: new Error(),
+        description: 'Student ID is not a v4 uuid',
+      });
+    }
+
     this.logger.log(`Updating Student ID: ${id}`);
+
     const existingStudent = await this.em.findOne(Student, { id }, {});
 
     if (!existingStudent) {

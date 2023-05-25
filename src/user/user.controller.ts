@@ -6,10 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { GetUserDto } from './dto/query-param-dto/get-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -25,9 +27,10 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  // @Param('id') id: string
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(id);
+  findOne(@Param() params: GetUserDto) {
+    return this.userService.findOne(params.id);
   }
 
   @Patch(':id')

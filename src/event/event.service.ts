@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { validate as uuidValidate, version as uuidVersion } from 'uuid';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { Event } from './entities/event.entity';
@@ -52,6 +53,13 @@ export class EventService {
   }
 
   async findOne(id: string, where: FilterQuery<Event> = {}) {
+    if (!uuidValidate(id) || uuidVersion(id) !== 4) {
+      throw new BadRequestException('Invalid student ID', {
+        cause: new Error(),
+        description: 'Student ID is not a v4 uuid',
+      });
+    }
+
     this.logger.log(`Finding Event ID: ${id}`);
 
     const existingEvent = await this.em.findOne(
@@ -71,7 +79,15 @@ export class EventService {
   }
 
   async update(id: string, updateEventDto: UpdateEventDto) {
+    if (!uuidValidate(id) || uuidVersion(id) !== 4) {
+      throw new BadRequestException('Invalid student ID', {
+        cause: new Error(),
+        description: 'Student ID is not a v4 uuid',
+      });
+    }
+
     this.logger.log(`Updating Event ID: ${id}`);
+
     const existingEvent = await this.em.findOne(Event, { id }, {});
 
     if (!existingEvent) {

@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { validate as uuidValidate, version as uuidVersion } from 'uuid';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { EntityManager } from '@mikro-orm/postgresql';
@@ -45,6 +46,13 @@ export class UserService {
   }
 
   async findOne(id: string, where: FilterQuery<User> = {}) {
+    if (!uuidValidate(id) || uuidVersion(id) !== 4) {
+      throw new BadRequestException('Invalid User ID', {
+        cause: new Error(),
+        description: 'User ID is not a v4 uuid',
+      });
+    }
+
     this.logger.log(`Finding User ID: ${id}`);
 
     const existingUser = await this.em.findOne(
@@ -64,6 +72,13 @@ export class UserService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
+    if (!uuidValidate(id) || uuidVersion(id) !== 4) {
+      throw new BadRequestException('Invalid student ID', {
+        cause: new Error(),
+        description: 'Student ID is not a v4 uuid',
+      });
+    }
+
     this.logger.log(`Finding User ID: ${id}`);
 
     const existingUser = await this.em.findOne(User, { id }, {});
