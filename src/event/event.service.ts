@@ -1,24 +1,23 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
-import { InjectRepository } from '@mikro-orm/nestjs';
 import { Event } from './entities/event.entity';
-import { EntityRepository } from '@mikro-orm/postgresql';
+import { EntityManager } from '@mikro-orm/postgresql';
+import { FilterQuery, wrap } from '@mikro-orm/core';
 
 @Injectable()
 export class EventService {
   private readonly logger = new Logger(EventService.name);
 
   constructor(
-    @InjectRepository(Event)
-    private readonly eventRepository: EntityRepository<Event>,
+    // @InjectRepository(Event)
+    // private readonly eventRepository: EntityRepository<Event>, // private readonly orm: MikroORM,
+    private readonly em: EntityManager,
   ) {}
 
   async create(createEventDto: CreateEventDto) {
     const newEvent = new Event();
 
-    // TODO: Make id auto increment and auto generated
-    newEvent.id = 1;
     newEvent.event_name = createEventDto.event_name;
     newEvent.event_start_date = new Date();
     newEvent.event_end_date = new Date();
@@ -37,26 +36,58 @@ export class EventService {
     newEvent.event_points = createEventDto.event_points;
 
     this.logger.log(`Creating new event: ${JSON.stringify(newEvent)}`);
-    await this.eventRepository.upsert(newEvent);
-    // await this.eventRepository.flush();
 
-    // return 'This action adds a new event';
+    const createEvent = this.em.create(Event, newEvent);
+    await this.em.upsert(createEvent);
+    await this.em.flush();
+
+    return {
+      message: 'success',
+    };
   }
 
-  findAll() {
-    return `This action returns all event`;
+  async findAll(where: FilterQuery<Event> = {}) {
+    const events = await this.em.find(Event, where, {});
+    return events;
   }
 
-  findOne(id: number) {
-    this.logger.log(`id: ${JSON.stringify({ id })}`);
-    return `This action returns a #${id} event`;
+  async findOne(id: string, where: FilterQuery<Event> = {}) {
+    this.logger.log(`Updating Event ID: ${id}`);
+
+    const existingEvent = await this.em.findOne(
+      Event,
+      Object.assign({}, where, { id }),
+      { filters: [] },
+    );
+
+    if (!existingEvent) {
+      throw new BadRequestException('Event ID does not exists', {
+        cause: new Error(),
+        description: 'Event ID does not exists',
+      });
+    }
+
+    return existingEvent;
   }
 
-  update(id: number, updateEventDto: UpdateEventDto) {
-    return `This action updates a #${id} event ${updateEventDto}`;
+  async update(id: string, updateEventDto: UpdateEventDto) {
+    this.logger.log(`Updating Event ID: ${id}`);
+    const existingEvent = await this.em.findOne(Event, { id }, {});
+
+    if (!existingEvent) {
+      throw new BadRequestException('Event ID does not exists', {
+        cause: new Error(),
+        description: 'Event ID does not exists',
+      });
+    }
+
+    wrap(existingEvent).assign(updateEventDto);
+    await this.em.persistAndFlush(existingEvent);
+
+    return existingEvent;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} event`;
+  remove(id: string) {
+    return this.em.remove(this.em.getReference(Event, id)).flush();
   }
 }

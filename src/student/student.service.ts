@@ -15,8 +15,15 @@ export class StudentService {
   async create(createStudentDto: CreateStudentDto) {
     const newStudent = new Student();
 
-    newStudent.student_name = 'abc';
-    newStudent.id = 1;
+    // newStudent.id = 1;
+    newStudent.student_name = createStudentDto.student_name;
+    newStudent.student_email = createStudentDto.student_email;
+    newStudent.student_college_name = createStudentDto.student_college_name;
+    newStudent.student_year_level = createStudentDto.student_year_level;
+    newStudent.student_mobile_number = createStudentDto.student_mobile_number;
+    newStudent.student_accumulated_points =
+      createStudentDto.student_accumulated_points;
+
     await this.studentRepository.upsert(newStudent);
 
     return 'This action adds a new student';
