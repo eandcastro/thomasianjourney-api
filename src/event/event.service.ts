@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import QrCode from 'qrcode';
 import { validate as uuidValidate, version as uuidVersion } from 'uuid';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -38,9 +39,19 @@ export class EventService {
 
     this.logger.log(`Creating new event: ${JSON.stringify(newEvent)}`);
 
+    const dataUrl = await QrCode.toDataURL(
+      `${JSON.stringify({
+        eventId: 'abc',
+      })}`,
+    );
+
     const createEvent = this.em.create(Event, newEvent);
-    await this.em.upsert(createEvent);
+    const createdEvent = await this.em.upsert(createEvent);
     await this.em.flush();
+
+    // TODO: add rollback here
+    wrap(createdEvent).assign({ event_qr: dataUrl });
+    await this.em.persistAndFlush(createdEvent);
 
     return {
       message: 'success',

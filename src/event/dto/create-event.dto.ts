@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 // import { Type } from 'class-transformer';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 // import { Metadata } from './metadata.dto';
 
 export class CreateEventDto {
@@ -40,12 +40,12 @@ export class CreateEventDto {
   event_broadcast_message: string;
 
   @IsNotEmpty()
-  @IsString()
+  @IsArray()
   @ApiProperty({ required: true, isArray: true })
   event_college_attendee: string[];
 
   @IsNotEmpty()
-  @IsString()
+  @IsArray()
   @ApiProperty({ required: true, isArray: true })
   event_year_level_attendee: number[];
 
@@ -60,7 +60,7 @@ export class CreateEventDto {
   event_category_name: string;
 
   @IsNotEmpty()
-  @IsString()
+  @IsNumber()
   @ApiProperty({ required: true })
   event_points: number;
 

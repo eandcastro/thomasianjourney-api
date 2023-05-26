@@ -22,7 +22,7 @@ export class Event extends BaseEntity {
   @Property()
   event_image!: string;
 
-  @Property()
+  @Property({ length: 2046 })
   event_qr!: string;
 
   @Property()

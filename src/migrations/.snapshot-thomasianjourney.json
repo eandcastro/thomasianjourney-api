@@ -179,11 +179,12 @@
         },
         "event_qr": {
           "name": "event_qr",
-          "type": "varchar(255)",
+          "type": "varchar(2046)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
+          "length": 2046,
           "mappedType": "string"
         },
         "event_venue": {
