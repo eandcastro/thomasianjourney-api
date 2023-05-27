@@ -1,11 +1,16 @@
-import { Entity, Property } from '@mikro-orm/core';
+import { Entity, ManyToOne, Property } from '@mikro-orm/core';
 import { BaseEntity } from '../../base.entity';
+import { Student } from '../../student/entities/student.entity';
+import { Event } from '../../event/entities/event.entity';
 
 @Entity()
 export class Attendee extends BaseEntity {
-  @Property({ columnType: 'uuid' })
-  student_id!: string;
+  @ManyToOne()
+  student!: Student;
 
-  @Property({ columnType: 'uuid' })
-  event_id!: string;
+  @ManyToOne()
+  event!: Event;
+
+  @Property()
+  has_attended = false;
 }

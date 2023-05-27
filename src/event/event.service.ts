@@ -6,10 +6,14 @@ import { UpdateEventDto } from './dto/update-event.dto';
 import { Event } from './entities/event.entity';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { FilterQuery, wrap } from '@mikro-orm/core';
+import { User } from '../user/entities/user.entity';
+import { Student } from '../student/entities/student.entity';
+import { AttendeesService } from '../attendees/attendees.service';
 
 @Injectable()
 export class EventService {
   private readonly logger = new Logger(EventService.name);
+  private readonly attendee = new AttendeesService(this.em);
 
   constructor(
     // @InjectRepository(Event)
@@ -33,41 +37,72 @@ export class EventService {
     newEvent.event_college_attendee = createEventDto.event_college_attendee;
     newEvent.event_year_level_attendee =
       createEventDto.event_year_level_attendee;
-    newEvent.event_posted_by_user_id = createEventDto.event_posted_by_user_id;
+    newEvent.user = this.em.getReference(
+      User,
+      createEventDto.event_posted_by_user_id,
+    );
+
     newEvent.event_category_name = createEventDto.event_category_name;
     newEvent.event_points = createEventDto.event_points;
 
     this.logger.log(`Creating new event: ${JSON.stringify(newEvent)}`);
 
-    const dataUrl = await QrCode.toDataURL(
-      `${JSON.stringify({
-        eventId: 'abc',
-      })}`,
-    );
-
+    // Create event record
     const createEvent = this.em.create(Event, newEvent);
+    this.logger.log(`Creating event: ${JSON.stringify(createEvent)}`);
+
     const createdEvent = await this.em.upsert(createEvent);
     await this.em.flush();
 
-    // TODO: add rollback here
+    const dataUrl = await QrCode.toDataURL(
+      `${JSON.stringify({
+        eventId: createdEvent.id,
+      })}`,
+    );
+
+    // TODO: add rollback here if it fails
     wrap(createdEvent).assign({ event_qr: dataUrl });
     await this.em.persistAndFlush(createdEvent);
 
-    return {
-      message: 'success',
-    };
+    // Create event attendees by college and year level
+    for (let i = 0; i < createdEvent.event_college_attendee.length; i++) {
+      for (let j = 0; j < createdEvent.event_year_level_attendee.length; j++) {
+        const where: FilterQuery<Student> = {
+          student_college_name: createdEvent.event_college_attendee[i],
+          student_year_level: createdEvent.event_year_level_attendee[j],
+        };
+
+        const existingStudent = await this.em.findOne(Student, where, {
+          filters: ['active'],
+        });
+
+        this.logger.log(
+          `Creating event attendee: ${JSON.stringify(existingStudent)}`,
+        );
+        if (!existingStudent) {
+          continue;
+        }
+
+        this.attendee.create({
+          event_id: createEvent.id,
+          student_id: existingStudent.id,
+        });
+      }
+    }
+
+    return createdEvent;
   }
 
   async findAll(where: FilterQuery<Event> = {}) {
-    const events = await this.em.find(Event, where, {});
+    const events = await this.em.find(Event, where, { filters: ['active'] });
     return events;
   }
 
   async findOne(id: string, where: FilterQuery<Event> = {}) {
     if (!uuidValidate(id) || uuidVersion(id) !== 4) {
-      throw new BadRequestException('Invalid student ID', {
+      throw new BadRequestException('Invalid event ID', {
         cause: new Error(),
-        description: 'Student ID is not a v4 uuid',
+        description: 'Event ID is not a v4 uuid',
       });
     }
 
@@ -89,6 +124,7 @@ export class EventService {
     return existingEvent;
   }
 
+  // TODO: aside from updating event, also update or remove attendees for this event
   async update(id: string, updateEventDto: UpdateEventDto) {
     if (!uuidValidate(id) || uuidVersion(id) !== 4) {
       throw new BadRequestException('Invalid student ID', {
@@ -114,7 +150,17 @@ export class EventService {
     return existingEvent;
   }
 
-  remove(id: string) {
-    return this.em.remove(this.em.getReference(Event, id)).flush();
+  // TODO: aside from removing event, also remove attendees for this event
+  async remove(id: string) {
+    const existingEvent = this.em.getReference(Event, id);
+
+    if (!existingEvent) {
+      throw new BadRequestException('Event ID does not exists', {
+        cause: new Error(),
+        description: 'Event ID does not exists',
+      });
+    }
+
+    return this.em.remove(existingEvent).flush();
   }
 }

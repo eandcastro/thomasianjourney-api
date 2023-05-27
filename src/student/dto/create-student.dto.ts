@@ -28,7 +28,7 @@ export class CreateStudentDto {
   student_mobile_number: string;
 
   @IsNotEmpty()
-  @IsString()
+  @IsNumber()
   @ApiProperty({ required: true })
   student_accumulated_points: number;
 }

@@ -1,5 +1,6 @@
-import { DateTimeType, Entity, Property } from '@mikro-orm/core';
+import { DateTimeType, Entity, ManyToOne, Property } from '@mikro-orm/core';
 import { BaseEntity } from '../../base.entity';
+import { User } from '../../user/entities/user.entity';
 
 @Entity()
 export class Event extends BaseEntity {
@@ -22,7 +23,7 @@ export class Event extends BaseEntity {
   @Property()
   event_image!: string;
 
-  @Property({ length: 2046 })
+  @Property({ length: 3000 })
   event_qr!: string;
 
   @Property()
@@ -41,11 +42,14 @@ export class Event extends BaseEntity {
   event_year_level_attendee!: number[];
 
   @Property({ nullable: true })
-  event_student_attendee_count?: string;
+  event_attendee_count?: string;
 
-  // TODO: make relation here to user entity
-  @Property()
-  event_posted_by_user_id!: string;
+  @ManyToOne()
+  user!: User;
+
+  // TODO: figure out how to create event record with nullable many to many relationship to student
+  // @ManyToMany(() => Student, null, { nullable: true })
+  // student?: Student;
 
   // TODO: make this enum
   @Property()

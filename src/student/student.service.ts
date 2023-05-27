@@ -29,12 +29,10 @@ export class StudentService {
     this.logger.log(`Creating new student: ${JSON.stringify(newStudent)}`);
 
     const createStudent = this.em.create(Student, newStudent);
-    await this.em.upsert(createStudent);
+    const student = await this.em.upsert(createStudent);
     await this.em.flush();
 
-    return {
-      message: 'success',
-    };
+    return student;
   }
 
   async findAll(where: FilterQuery<Student> = {}) {

@@ -32,12 +32,10 @@ export class UserService {
     this.logger.log(`Creating new user: ${JSON.stringify(newUser)}`);
 
     const createUser = this.em.create(User, newUser);
-    await this.em.upsert(createUser);
+    const user = await this.em.upsert(createUser);
     await this.em.flush();
 
-    return {
-      message: 'success',
-    };
+    return user;
   }
 
   async findAll(where: FilterQuery<User> = {}) {

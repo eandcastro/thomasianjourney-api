@@ -20,7 +20,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "db:init": "mikro-orm migration:fresh",
     "db:migrate-latest": "mikro-orm migration:up",
-    "db:create-migration": "mikro-orm migration:create"
+    "db:create-migration": "mikro-orm migration:create",
+    "db:new": "npm run db:init && npm run db:create-migration && npm run db:migrate-latest"
   },
   "dependencies": {
     "@mikro-orm/cli": "^5.7.8",
