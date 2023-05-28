@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { EventService } from './event.service';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -14,14 +15,72 @@ import { UpdateEventDto } from './dto/update-event.dto';
 import { EntityTransformInterceptor } from '../utils/entity_transform.interceptor';
 import { Event } from './entities/event.entity';
 import { EventResponse } from './types';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 
 @Controller('event')
 export class EventController {
   constructor(private readonly eventService: EventService) {}
 
+  @ApiConsumes('multipart/form-data')
   @Post()
-  create(@Body() createEventDto?: CreateEventDto) {
-    return this.eventService.create(createEventDto);
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+        event_name: {
+          type: 'string',
+        },
+        event_description: {
+          type: 'string',
+        },
+        event_venue: {
+          type: 'string',
+        },
+        event_lead_office: {
+          type: 'string',
+        },
+        event_broadcast_message: {
+          type: 'string',
+        },
+        event_college_attendee: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
+        event_year_level_attendee: {
+          type: 'array',
+          items: {
+            type: 'number',
+          },
+        },
+        event_posted_by_user_id: {
+          type: 'string',
+        },
+        event_category_name: {
+          type: 'string',
+        },
+        event_points: {
+          type: 'number',
+        },
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  create(
+    @Body() createEventDto: CreateEventDto,
+    @UploadedFile() file: Express.MulterS3.File,
+  ) {
+    return this.eventService.create(
+      createEventDto,
+      file.buffer,
+      file.originalname,
+    );
   }
 
   @Get()

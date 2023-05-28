@@ -7,12 +7,14 @@ import { UserModule } from '../user/user.module';
 import { User } from '../user/entities/user.entity';
 import { Student } from '../student/entities/student.entity';
 import { StudentModule } from '../student/student.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
     MikroOrmModule.forFeature([Event, User, Student]),
     UserModule,
     StudentModule,
+    ConfigModule,
   ],
   controllers: [EventController],
   providers: [EventService],

@@ -11,7 +11,10 @@ import { AttendeesModule } from './attendees/attendees.module';
 @Module({
   imports: [
     MikroOrmModule.forRoot(mikroOrmConfig),
-    ConfigModule.forRoot(),
+    // Set this to true to ignore env file
+    ConfigModule.forRoot({
+      ignoreEnvFile: false,
+    }),
     UserModule,
     EventModule,
     StudentModule,

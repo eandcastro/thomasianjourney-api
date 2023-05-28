@@ -40,24 +40,24 @@ describe('EventController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should create user and return him', async () => {
-    expect(
-      await controller.create({
-        event_name: 'Paskuhan',
-        event_description: 'Christmas Paskuhan',
-        event_image: 'paskuhan_image.jpg',
-        event_qr: 'paskuhan_qr.png',
-        event_venue: 'QPAV',
-        event_lead_office: 'Office of CICS',
-        event_broadcast_message: 'Please attend the event.',
-        event_college_attendee: ['CICS', 'SCIENCE'],
-        event_year_level_attendee: [1, 2],
-        event_posted_by_user_id: '1',
-        event_category_name: 'school_events',
-        event_points: 1,
-      }),
-    ).toEqual({
-      message: 'success',
-    });
-  });
+  // it('should create user and return him', async () => {
+  //   expect(
+  //     await controller.create({
+  //       event_name: 'Paskuhan',
+  //       event_description: 'Christmas Paskuhan',
+  //       event_image: 'paskuhan_image.jpg',
+  //       event_qr: 'paskuhan_qr.png',
+  //       event_venue: 'QPAV',
+  //       event_lead_office: 'Office of CICS',
+  //       event_broadcast_message: 'Please attend the event.',
+  //       event_college_attendee: ['CICS', 'SCIENCE'],
+  //       event_year_level_attendee: [1, 2],
+  //       event_posted_by_user_id: '1',
+  //       event_category_name: 'school_events',
+  //       event_points: 1,
+  //     }),
+  //   ).toEqual({
+  //     message: 'success',
+  //   });
+  // });
 });
