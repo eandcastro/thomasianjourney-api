@@ -25,6 +25,7 @@ export class StudentService {
     newStudent.student_mobile_number = createStudentDto.student_mobile_number;
     newStudent.student_accumulated_points =
       createStudentDto.student_accumulated_points;
+    newStudent.role = 'student';
 
     this.logger.log(`Creating new student: ${JSON.stringify(newStudent)}`);
 

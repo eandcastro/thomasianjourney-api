@@ -1,8 +1,8 @@
-import { Entity, Enum, Property } from '@mikro-orm/core';
-import { BaseEntity } from '../../base.entity';
+import { Entity, Property } from '@mikro-orm/core';
+import { BaseUser } from '../../base-user.entity';
 
 @Entity()
-export class User extends BaseEntity {
+export class User extends BaseUser {
   @Property()
   first_name!: string;
 
@@ -18,9 +18,6 @@ export class User extends BaseEntity {
   @Property()
   password!: string;
 
-  @Enum(() => UserRole)
-  role!: string;
-
   @Property()
   office!: string;
 
@@ -29,9 +26,4 @@ export class User extends BaseEntity {
 
   @Property()
   contact_person_last_name!: string;
-}
-
-export enum UserRole {
-  ADMIN = 'admin',
-  SUPERADMIN = 'superadmin',
 }

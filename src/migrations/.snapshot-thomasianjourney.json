@@ -45,6 +45,20 @@
           "length": 6,
           "mappedType": "datetime"
         },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "enumItems": [
+            "admin",
+            "superadmin",
+            "student"
+          ],
+          "mappedType": "enum"
+        },
         "student_name": {
           "name": "student_name",
           "type": "varchar(255)",
@@ -157,6 +171,20 @@
           "length": 6,
           "mappedType": "datetime"
         },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "enumItems": [
+            "admin",
+            "superadmin",
+            "student"
+          ],
+          "mappedType": "enum"
+        },
         "first_name": {
           "name": "first_name",
           "type": "varchar(255)",
@@ -201,19 +229,6 @@
           "primary": false,
           "nullable": false,
           "mappedType": "string"
-        },
-        "role": {
-          "name": "role",
-          "type": "text",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "enumItems": [
-            "admin",
-            "superadmin"
-          ],
-          "mappedType": "enum"
         },
         "office": {
           "name": "office",

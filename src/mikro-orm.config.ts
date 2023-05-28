@@ -6,10 +6,11 @@ import { Logger } from '@nestjs/common';
 import { BaseEntity } from './base.entity';
 import { Timestamps } from './timestamps.entity';
 import { Attendee } from './attendees/entities/attendee.entity';
+import { BaseUser } from './base-user.entity';
 
 const logger = new Logger('MikroORM');
 const config: Options = {
-  entities: [BaseEntity, Timestamps, Event, Student, User, Attendee], // no need for `entitiesTs` this way
+  entities: [BaseEntity, Timestamps, Event, Student, User, Attendee, BaseUser], // no need for `entitiesTs` this way
   dbName: 'thomasianjourney',
   debug: true,
   logger: logger.log.bind(logger),
