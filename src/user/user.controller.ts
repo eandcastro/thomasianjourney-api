@@ -6,11 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { GetUserDto } from './dto/query-param-dto/get-user.dto';
+import { GetAllUserDto } from './dto/query-param-dto/get-all-users.dto';
 
 @Controller('user')
 export class UserController {
@@ -22,19 +24,30 @@ export class UserController {
   }
 
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  findAll(@Query() query: GetAllUserDto) {
+    return this.userService.findAll(
+      { role: query.role, office: query.office },
+      query.filters,
+    );
   }
 
   // @Param('id') id: string
   @Get(':id')
-  findOne(@Param() params: GetUserDto) {
-    return this.userService.findOne(params.id);
+  findOne(@Param() params: GetUserDto, @Query() query: GetAllUserDto) {
+    return this.userService.findOne(params.id, {
+      role: query.role,
+      office: query.office,
+    });
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);
+  }
+
+  @Delete('/soft-delete/:id')
+  softRemove(@Param('id') id: string) {
+    return this.userService.softRemove(id);
   }
 
   @Delete(':id')

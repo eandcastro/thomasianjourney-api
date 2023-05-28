@@ -90,6 +90,7 @@ export class EventService {
       }
     }
 
+    // TODO: add email sending here
     return createdEvent;
   }
 

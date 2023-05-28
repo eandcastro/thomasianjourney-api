@@ -38,12 +38,16 @@ export class UserService {
     return user;
   }
 
-  async findAll(where: FilterQuery<User> = {}) {
-    const users = await this.em.find(User, where, {});
+  async findAll(where: FilterQuery<User> = {}, filters: string[] = []) {
+    const users = await this.em.find(User, where, { filters });
     return users;
   }
 
-  async findOne(id: string, where: FilterQuery<User> = {}) {
+  async findOne(
+    id: string,
+    where: FilterQuery<User> = {},
+    filters: string[] = ['active'],
+  ) {
     if (!uuidValidate(id) || uuidVersion(id) !== 4) {
       throw new BadRequestException('Invalid User ID', {
         cause: new Error(),
@@ -56,7 +60,7 @@ export class UserService {
     const existingUser = await this.em.findOne(
       User,
       Object.assign({}, where, { id }),
-      { filters: [] },
+      { filters },
     );
 
     if (!existingUser) {
@@ -79,7 +83,11 @@ export class UserService {
 
     this.logger.log(`Finding User ID: ${id}`);
 
-    const existingUser = await this.em.findOne(User, { id }, {});
+    const existingUser = await this.em.findOne(
+      User,
+      { id },
+      { filters: ['active'] },
+    );
 
     if (!existingUser) {
       throw new BadRequestException('User ID does not exists', {
@@ -90,6 +98,26 @@ export class UserService {
 
     wrap(existingUser).assign(updateUserDto);
     await this.em.persistAndFlush(existingUser);
+
+    return existingUser;
+  }
+
+  async softRemove(id: string) {
+    const existingUser = await this.em.findOne(
+      User,
+      { id },
+      { filters: ['active'] },
+    );
+
+    if (!existingUser) {
+      throw new BadRequestException('User ID does not exists', {
+        cause: new Error(),
+        description: 'User ID does not exists',
+      });
+    }
+
+    existingUser.deleted_at = new Date();
+    await this.em.flush();
 
     return existingUser;
   }

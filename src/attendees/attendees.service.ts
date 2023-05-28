@@ -56,12 +56,12 @@ export class AttendeesService {
 
     const existingAttendee = await this.em.findOne(Attendee, where, {});
 
+    existingAttendee.has_attended = true;
+    await this.em.flush();
+
     this.logger.log(
       `Attendee attending event: ${JSON.stringify(existingAttendee)}`,
     );
-
-    existingAttendee.has_attended = true;
-    await this.em.flush();
 
     return existingAttendee;
   }
