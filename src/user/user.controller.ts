@@ -23,6 +23,11 @@ import { S2SGuard } from '../auth/s2s.guard';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @ApiHeader({
+    name: 'x-tj-api-security-token',
+    description: 'A custom security token to ensure the origin of the request',
+  })
+  @UseGuards(S2SGuard)
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
@@ -48,8 +53,9 @@ export class UserController {
     );
   }
 
-  // @Param('id') id: string
   @Get(':id')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   findOne(@Param() params: GetUserDto, @Query() query: GetAllUserDto) {
     return this.userService.findOne(params.id, {
       role: query.role,
@@ -58,16 +64,22 @@ export class UserController {
   }
 
   @Patch(':id')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);
   }
 
   @Delete('/soft-delete/:id')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   softRemove(@Param('id') id: string) {
     return this.userService.softRemove(id);
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }
