@@ -1,14 +1,17 @@
 import { Module } from '@nestjs/common';
-import { UserService } from './user.service';
-import { UserController } from './user.controller';
-import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { User } from './entities/user.entity';
-import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { User } from '../user/entities/user.entity';
+import { UserService } from '../user/user.service';
+import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './jwt.strategy';
+import { JwtModule } from '@nestjs/jwt';
+import { S2SGuard } from './s2s.guard';
 
 @Module({
   imports: [
     MikroOrmModule.forFeature([User]),
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -20,7 +23,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       }),
     }),
   ],
-  controllers: [UserController],
-  providers: [UserService, ConfigService],
+  providers: [JwtStrategy, ConfigService, S2SGuard, UserService],
+  exports: [PassportModule],
 })
-export class UserModule {}
+export class AuthModule {}

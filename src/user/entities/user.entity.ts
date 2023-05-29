@@ -9,10 +9,10 @@ export class User extends BaseUser {
   @Property()
   last_name!: string;
 
-  @Property()
+  @Property({ unique: true })
   email!: string;
 
-  @Property()
+  @Property({ unique: true })
   username!: string;
 
   @Property()

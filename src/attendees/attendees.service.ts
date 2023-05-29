@@ -78,12 +78,17 @@ export class AttendeesService {
       event,
     };
 
-    const eventAttendees = await this.em.findOne(Attendee, where, {
+    const eventAttendees = await this.em.find(Attendee, where, {
       filters: ['active'],
       populate: ['event', 'student'],
     });
 
-    return eventAttendees;
+    const eventAttendeesCount = await this.em.findAndCount(Attendee, where, {
+      filters: ['active'],
+      populate: ['event', 'student'],
+    });
+
+    return { ...eventAttendees, count: eventAttendeesCount };
   }
 
   update(id: number) {
