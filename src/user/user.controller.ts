@@ -17,7 +17,7 @@ import { GetAllUserDto } from './dto/query-param-dto/get-all-users.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { S2SGuard } from 'src/auth/s2s.guard';
+import { S2SGuard } from '../auth/s2s.guard';
 
 @Controller('user')
 export class UserController {
