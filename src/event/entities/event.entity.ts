@@ -50,9 +50,9 @@ export class Event extends BaseEntity {
   @ManyToOne()
   user!: User;
 
-  // TODO: figure out how to create event record with nullable many to many relationship to student
+  // TODO: Make this pivot entity to make it manytomany relationship
   // @ManyToMany(() => Student, null, { nullable: true })
-  // student?: Student;
+  // attendee?: attendee;
 
   // TODO: make this enum
   @Property()
