@@ -18,6 +18,8 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { S2SGuard } from '../auth/s2s.guard';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 
 @Controller('user')
 export class UserController {
@@ -45,7 +47,8 @@ export class UserController {
 
   @Get()
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @Roles('admin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   findAll(@Query() query: GetAllUserDto) {
     return this.userService.findAll(
       { role: query.role, office: query.office },
