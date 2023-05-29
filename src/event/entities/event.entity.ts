@@ -45,7 +45,7 @@ export class Event extends BaseEntity {
   event_grouped_emails: string[];
 
   @Property({ nullable: true })
-  event_attendee_count?: string;
+  event_attendee_count?: number;
 
   @ManyToOne()
   user!: User;

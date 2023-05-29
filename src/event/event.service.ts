@@ -16,7 +16,7 @@ import { EmailService } from '../email/email.service';
 @Injectable()
 export class EventService {
   private readonly logger = new Logger(EventService.name);
-  private readonly attendee = new AttendeesService(this.em);
+  private readonly attendeeService = new AttendeesService(this.em);
   // private readonly emailService = new EmailService();
   constructor(
     // @InjectRepository(Event)
@@ -122,7 +122,7 @@ export class EventService {
         }
 
         existingStudents.map((existingStudent) => {
-          this.attendee.create({
+          this.attendeeService.create({
             event_id: createEvent.id,
             student_id: existingStudent.id,
           });

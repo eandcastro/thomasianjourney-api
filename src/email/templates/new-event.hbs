@@ -1,5 +1,15 @@
-
-<h1>{{ event_name }}</h1>
-
-<p>{{ broadcast_message }}</p>
-<img src="{{ qr_code }}" alt="" style="border: 5px inset black;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>UST Event</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h1>{{ event_name }}</h1>
+    <p>{{ broadcast_message }}</p>
+    {{!-- TODO: FIGURE OUT HERE HOW TO RENDER QR CODE URL OR EVENT IMAGE --}}
+    <div>
+      <img src="{{ qr_code }}" height="300" width="300" alt="">
+    </div>
+</body>
+</html>

@@ -34,6 +34,7 @@ export class AttendeesService {
     return attendee;
   }
 
+  // TODO: Update event to add event_attendee_count for every attendee
   async attendEvent(event_id: string, student_id: string) {
     const student = this.em.getReference(Student, student_id);
     const event = this.em.getReference(Event, event_id);
@@ -49,6 +50,7 @@ export class AttendeesService {
       });
     }
 
+    // TODO: check if you can query by has_attended = "false"
     const where: FilterQuery<Attendee> = {
       event,
       student,
@@ -56,7 +58,19 @@ export class AttendeesService {
 
     const existingAttendee = await this.em.findOne(Attendee, where, {});
 
+    if (existingAttendee.has_attended) {
+      throw new BadRequestException('Attendee has already attended the event', {
+        cause: new Error(),
+        description: 'Attended already',
+      });
+    }
+
     existingAttendee.has_attended = true;
+    await this.em.flush();
+
+    const existingEvent = await this.em.findOne(Event, { id: event.id }, {});
+
+    existingEvent.event_attendee_count = existingEvent.event_attendee_count + 1;
     await this.em.flush();
 
     this.logger.log(

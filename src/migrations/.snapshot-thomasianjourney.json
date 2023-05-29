@@ -455,12 +455,12 @@
         },
         "event_attendee_count": {
           "name": "event_attendee_count",
-          "type": "varchar(255)",
+          "type": "int",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "mappedType": "string"
+          "mappedType": "integer"
         },
         "user_id": {
           "name": "user_id",
