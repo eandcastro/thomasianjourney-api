@@ -34,7 +34,6 @@ export class AttendeesService {
     return attendee;
   }
 
-  // TODO: Update event to add event_attendee_count for every attendee
   async attendEvent(event_id: string, student_id: string) {
     const student = this.em.getReference(Student, student_id);
     const event = this.em.getReference(Event, event_id);
