@@ -41,6 +41,9 @@ export class Event extends BaseEntity {
   @Property()
   event_year_level_attendee!: number[];
 
+  @Property()
+  event_grouped_emails: string[];
+
   @Property({ nullable: true })
   event_attendee_count?: string;
 

@@ -444,6 +444,15 @@
           "nullable": false,
           "mappedType": "array"
         },
+        "event_grouped_emails": {
+          "name": "event_grouped_emails",
+          "type": "text[]",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "array"
+        },
         "event_attendee_count": {
           "name": "event_attendee_count",
           "type": "varchar(255)",

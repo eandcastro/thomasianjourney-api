@@ -25,6 +25,8 @@ import { RolesGuard } from '../auth/roles.guard';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  // TODO: add create superadmin user endpoint, this existing endpoint below is for create admin
+  // MAKE A SEPARATE SECURITY TOKEN FOR BOTH ENDPOINTS
   @ApiHeader({
     name: 'x-tj-api-security-token',
     description: 'A custom security token to ensure the origin of the request',

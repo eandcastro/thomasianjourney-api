@@ -15,7 +15,7 @@ export class User extends BaseUser {
   @Property({ unique: true })
   username!: string;
 
-  @Property()
+  @Property({ hidden: true })
   password!: string;
 
   @Property()

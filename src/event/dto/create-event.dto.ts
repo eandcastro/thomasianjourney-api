@@ -42,6 +42,12 @@ export class CreateEventDto {
   event_year_level_attendee: number[];
 
   @IsNotEmpty()
+  @IsArray()
+  @ApiProperty({ required: true, isArray: true })
+  @Transform(({ value }) => (Array.isArray(value) ? value : Array(value)))
+  event_grouped_emails: string[];
+
+  @IsNotEmpty()
   @IsString()
   @ApiProperty({ required: true })
   event_posted_by_user_id: string;

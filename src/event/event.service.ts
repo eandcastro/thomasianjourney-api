@@ -11,17 +11,19 @@ import { Student } from '../student/entities/student.entity';
 import { AttendeesService } from '../attendees/attendees.service';
 import { ConfigService } from '@nestjs/config';
 import { S3 } from 'aws-sdk';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class EventService {
   private readonly logger = new Logger(EventService.name);
   private readonly attendee = new AttendeesService(this.em);
-
+  // private readonly emailService = new EmailService();
   constructor(
     // @InjectRepository(Event)
     // private readonly eventRepository: EntityRepository<Event>, // private readonly orm: MikroORM,
     private readonly em: EntityManager,
     private readonly configService: ConfigService,
+    private emailService: EmailService,
   ) {}
 
   async create(
@@ -45,6 +47,13 @@ export class EventService {
         return item;
       });
 
+    const stringifiedGroupedEmails: any = `${createEventDto.event_grouped_emails}`;
+    const parsedGroupedEmails: string[] = stringifiedGroupedEmails
+      .split(',')
+      .map((item: string) => {
+        return item;
+      });
+
     newEvent.event_name = createEventDto.event_name;
     newEvent.event_start_date = new Date();
     newEvent.event_end_date = new Date();
@@ -57,6 +66,7 @@ export class EventService {
     newEvent.event_broadcast_message = createEventDto.event_broadcast_message;
     newEvent.event_college_attendee = parsedColleges;
     newEvent.event_year_level_attendee = parsedYearLevels;
+    newEvent.event_grouped_emails = parsedGroupedEmails;
     newEvent.user = this.em.getReference(
       User,
       createEventDto.event_posted_by_user_id,
@@ -120,7 +130,15 @@ export class EventService {
       }
     }
 
-    // TODO: add email sending here
+    createdEvent.event_grouped_emails.map(async (emailRecipient: string) => {
+      await this.emailService.sendNewEventNotification(
+        emailRecipient,
+        createdEvent.event_name,
+        createdEvent.event_broadcast_message,
+        createdEvent.event_qr,
+      );
+    });
+
     return createdEvent;
   }
 
@@ -206,5 +224,14 @@ export class EventService {
     }
 
     return this.em.remove(existingEvent).flush();
+  }
+
+  async testEmail(event_name: string, broadcast_message) {
+    this.emailService.sendNewEventNotification(
+      'eanj.dcastro@gmail.com',
+      event_name,
+      broadcast_message,
+      broadcast_message,
+    );
   }
 }

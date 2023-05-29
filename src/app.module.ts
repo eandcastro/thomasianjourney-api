@@ -9,6 +9,7 @@ import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { ConfigModule } from '@nestjs/config';
 import { AttendeesModule } from './attendees/attendees.module';
 import { AuthModule } from './auth/auth.module';
+import { EmailModule } from './email/email.module';
 @Module({
   imports: [
     MikroOrmModule.forRoot(mikroOrmConfig),
@@ -21,6 +22,7 @@ import { AuthModule } from './auth/auth.module';
     StudentModule,
     AttendeesModule,
     AuthModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

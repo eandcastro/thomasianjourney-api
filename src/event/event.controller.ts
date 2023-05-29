@@ -59,6 +59,12 @@ export class EventController {
             type: 'number',
           },
         },
+        event_grouped_emails: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
         event_posted_by_user_id: {
           type: 'string',
         },
@@ -112,4 +118,12 @@ export class EventController {
   // ) {
   //   return this.eventService.attendEvent(event_id, student_id);
   // }
+
+  @Post('/test-email')
+  createEventAttendee(@Body() createEventDto: CreateEventDto) {
+    return this.eventService.testEmail(
+      createEventDto.event_name,
+      createEventDto.event_broadcast_message,
+    );
+  }
 }
