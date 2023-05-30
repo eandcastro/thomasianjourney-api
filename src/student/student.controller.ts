@@ -24,7 +24,7 @@ import { S2SGuardStudent } from '../auth/s2s.student.guard';
 @Controller('student')
 export class StudentController {
   constructor(private readonly studentService: StudentService) {}
-
+  // TODO: Specify which endpoints require public security token
   @Post()
   create(@Body() createStudentDto: CreateStudentDto) {
     return this.studentService.create(createStudentDto);

@@ -17,6 +17,7 @@ import { Event } from './entities/event.entity';
 import { EventResponse } from './types';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { TestDTO } from './dto/test-data.dto';
 
 @Controller('event')
 export class EventController {
@@ -125,5 +126,10 @@ export class EventController {
       createEventDto.event_name,
       createEventDto.event_broadcast_message,
     );
+  }
+
+  @Post('/test-qr')
+  testQrCode(@Body() createEventDto: TestDTO) {
+    return this.eventService.testQrCode(createEventDto.event_name);
   }
 }

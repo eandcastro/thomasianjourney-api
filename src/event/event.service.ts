@@ -12,6 +12,7 @@ import { AttendeesService } from '../attendees/attendees.service';
 import { ConfigService } from '@nestjs/config';
 import { S3 } from 'aws-sdk';
 import { EmailService } from '../email/email.service';
+import fs from 'fs/promises';
 
 @Injectable()
 export class EventService {
@@ -82,11 +83,7 @@ export class EventService {
     const createdEvent = await this.em.upsert(createEvent);
     await this.em.flush();
 
-    const dataUrl = await QrCode.toDataURL(
-      `${JSON.stringify({
-        eventId: createdEvent.id,
-      })}`,
-    );
+    await this.uploadEventQrCode(createEvent.id, createdEvent.event_name);
 
     const uploadedImage = await this.uploadFile(
       imageBuffer,
@@ -100,7 +97,7 @@ export class EventService {
 
     // TODO: add rollback here if it fails
     wrap(createdEvent).assign({
-      event_qr: dataUrl,
+      event_qr: `${createdEvent.event_name}.png`,
       event_image: filename,
     });
     await this.em.persistAndFlush(createdEvent);
@@ -233,5 +230,46 @@ export class EventService {
       broadcast_message,
       broadcast_message,
     );
+  }
+
+  async uploadEventQrCode(event_id: string, event_name: string) {
+    const filename = `${event_id}${event_name}-qr.png`;
+    await QrCode.toFile(
+      `${__dirname}/temp/${filename}`,
+      `${JSON.stringify({
+        event_id,
+      })}`,
+      {
+        color: {
+          dark: '#FFFFFF',
+          light: '#0000',
+        },
+      },
+    );
+
+    const buffer = await fs.readFile(`${__dirname}/temp/${filename}`);
+    await this.uploadFile(buffer, filename, event_id);
+    await fs.unlink(`${__dirname}/temp/${filename}`);
+  }
+
+  // THIS IS FOR TESTING PURPOSES ONLY
+  async testQrCode(event_name: string) {
+    await QrCode.toFile(
+      `${__dirname}/temp/${event_name}.png`,
+      `${JSON.stringify({
+        event_name,
+      })}`,
+      {
+        color: {
+          dark: '#FFFFFF', // Blue dots
+          light: '#0000', // Transparent background
+        },
+      },
+    );
+
+    const text = await fs.readFile(`${__dirname}/temp/${event_name}.png`);
+
+    await this.uploadFile(text, `${event_name}.png`, 'abc');
+    await fs.unlink(`${__dirname}/temp/${event_name}.png`);
   }
 }
