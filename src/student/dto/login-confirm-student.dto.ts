@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class LoginConfirmStudentDto {
   @IsNotEmpty()
@@ -16,4 +16,9 @@ export class LoginConfirmStudentDto {
   @IsString()
   @ApiProperty({ required: true })
   fcm_token: string;
+
+  @IsNotEmpty()
+  @IsBoolean()
+  @ApiProperty()
+  is_new_sso?: boolean;
 }

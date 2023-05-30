@@ -17,6 +17,8 @@ import { Roles } from '../auth/roles.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { RolesGuard } from '../auth/roles.guard';
+import { SignupStudentDto } from './dto/signup-student.dto';
+import { SignupConfirmStudentDto } from './dto/signup-confirm-student.dto';
 
 @Controller('student')
 export class StudentController {
@@ -25,6 +27,16 @@ export class StudentController {
   @Post()
   create(@Body() createStudentDto: CreateStudentDto) {
     return this.studentService.create(createStudentDto);
+  }
+
+  @Post('sign-up')
+  signUp(@Body() signupStudentDto: SignupStudentDto) {
+    return this.studentService.signUp(signupStudentDto);
+  }
+
+  @Post('sign-up/confirm')
+  signUpConfirm(@Body() signUpConfirmStudentDto: SignupConfirmStudentDto) {
+    return this.studentService.signUpConfirm(signUpConfirmStudentDto);
   }
 
   // TODO: Add otp feature for student module

@@ -1,9 +1,9 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20230530084318 extends Migration {
+export class Migration20230530110927 extends Migration {
 
   async up(): Promise<void> {
-    this.addSql('create table "student" ("id" uuid not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "deleted_at" timestamptz(0) null, "role" text check ("role" in (\'admin\', \'superadmin\', \'student\')) not null, "fcm_token" varchar(255) null, "student_name" varchar(255) not null, "student_email" varchar(255) not null, "otp" varchar(255) null, "student_college_name" varchar(255) not null, "student_year_level" int not null, "student_mobile_number" varchar(255) not null, "student_accumulated_points" int not null, constraint "student_pkey" primary key ("id"));');
+    this.addSql('create table "student" ("id" uuid not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "deleted_at" timestamptz(0) null, "role" text check ("role" in (\'admin\', \'superadmin\', \'student\')) not null, "fcm_token" varchar(255) null, "student_name" varchar(255) not null, "student_email" varchar(255) not null, "otp" varchar(255) null, "has_sso" varchar(255) not null default false, "student_college_name" varchar(255) not null, "student_year_level" int not null, "student_mobile_number" varchar(255) not null, "student_accumulated_points" int not null, constraint "student_pkey" primary key ("id"));');
     this.addSql('alter table "student" add constraint "student_fcm_token_unique" unique ("fcm_token");');
     this.addSql('alter table "student" add constraint "student_student_email_unique" unique ("student_email");');
     this.addSql('alter table "student" add constraint "student_student_mobile_number_unique" unique ("student_mobile_number");');

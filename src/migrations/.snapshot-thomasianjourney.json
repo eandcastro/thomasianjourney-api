@@ -95,6 +95,16 @@
           "nullable": true,
           "mappedType": "string"
         },
+        "has_sso": {
+          "name": "has_sso",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "string"
+        },
         "student_college_name": {
           "name": "student_college_name",
           "type": "varchar(255)",

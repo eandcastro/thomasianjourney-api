@@ -25,8 +25,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private readonly jwtService: JwtService,
     private emailService: EmailService,
   ) {
-    console.log(`${configService.get('JWT_SECRET')}`);
-    console.log(`${ExtractJwt.fromAuthHeaderAsBearerToken()}`);
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: configService.get('JWT_SECRET'),
@@ -46,7 +44,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         return this.userService.findOne(payload.id, {
           role: payload.role,
         });
-      // TODO: implement jwt service in student service
       case 'student':
         return this.studentService.findOne(payload.id, {
           role: payload.role,

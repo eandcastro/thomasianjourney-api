@@ -12,6 +12,9 @@ export class Student extends BaseUser {
   @Property({ nullable: true, hidden: true })
   otp?: string;
 
+  @Property({ hidden: true })
+  has_sso = false;
+
   @Property()
   student_college_name!: string;
 

@@ -11,6 +11,8 @@ import { JwtService } from '@nestjs/jwt';
 import { TokenPayload } from './student.types';
 import { EmailService } from '../email/email.service';
 import { LoginConfirmStudentDto } from './dto/login-confirm-student.dto';
+import { SignupStudentDto } from './dto/signup-student.dto';
+import { SignupConfirmStudentDto } from './dto/signup-confirm-student.dto';
 
 @Injectable()
 export class StudentService {
@@ -45,6 +47,77 @@ export class StudentService {
     await this.em.flush();
 
     return student;
+  }
+
+  async signUp(signupStudentDto: SignupStudentDto) {
+    const newStudent = new Student();
+
+    newStudent.student_name = signupStudentDto.student_name;
+    newStudent.student_email = signupStudentDto.student_email;
+    newStudent.student_college_name = signupStudentDto.student_college_name;
+    newStudent.student_year_level = signupStudentDto.student_year_level;
+    newStudent.student_mobile_number = signupStudentDto.student_mobile_number;
+    newStudent.student_accumulated_points = 1;
+    newStudent.role = 'student';
+    newStudent.fcm_token = signupStudentDto.fcm_token;
+
+    this.logger.log(`New student signup: ${JSON.stringify(newStudent)}`);
+
+    const createStudent = this.em.create(Student, newStudent);
+    const student = await this.em.upsert(createStudent);
+    await this.em.flush();
+
+    // Generating otp for student
+    const otp = await this.generateOtp();
+
+    // Generating hashed otp for student
+    const hashedOtp = await bcrypt.hash(otp, 15);
+
+    // Send email otp
+    await this.emailService.sendOtp(student.student_email, student.otp);
+
+    student.otp = hashedOtp;
+    await this.em.flush();
+
+    return { student, otp };
+  }
+
+  async signUpConfirm(signupConfirmStudentDto: SignupConfirmStudentDto) {
+    const existingStudent = await this.em.findOne(
+      Student,
+      { student_email: signupConfirmStudentDto.email },
+      { filters: ['active'] },
+    );
+
+    if (!existingStudent) {
+      throw new BadRequestException('Student does not exists', {
+        cause: new Error(),
+        description: 'Student does not exists',
+      });
+    }
+
+    const isOtpMatching = await bcrypt.compare(
+      signupConfirmStudentDto.otp.toString(),
+      existingStudent.otp,
+    );
+
+    if (!isOtpMatching) {
+      throw new BadRequestException('OTP is incorrect', {
+        cause: new Error(),
+        description: 'OTP is incorrect',
+      });
+    }
+
+    const cookie = this.getCookieWithJwtToken(
+      existingStudent.id,
+      existingStudent.role,
+      existingStudent.fcm_token,
+    );
+
+    existingStudent.has_sso = true;
+    await this.em.flush();
+
+    return cookie;
   }
 
   async login(loginStudentDto: LoginStudentDto) {
@@ -84,11 +157,18 @@ export class StudentService {
   }
 
   async loginConfirm(loginConfirmStudentDto: LoginConfirmStudentDto) {
-    const existingStudent = await this.em.findOne(
-      Student,
-      { student_email: loginConfirmStudentDto.email },
-      { filters: ['active'] },
-    );
+    const where: FilterQuery<Student> = loginConfirmStudentDto.is_new_sso
+      ? {
+          student_email: loginConfirmStudentDto.email,
+        }
+      : {
+          student_email: loginConfirmStudentDto.email,
+          fcm_token: loginConfirmStudentDto.fcm_token,
+        };
+
+    const existingStudent = await this.em.findOne(Student, where, {
+      filters: ['active'],
+    });
 
     if (!existingStudent) {
       throw new BadRequestException('Student does not exists', {
@@ -115,8 +195,17 @@ export class StudentService {
       existingStudent.fcm_token,
     );
 
-    existingStudent.fcm_token = loginConfirmStudentDto.fcm_token;
-    await this.em.flush();
+    if (loginConfirmStudentDto.is_new_sso) {
+      if (!loginConfirmStudentDto.fcm_token) {
+        throw new BadRequestException('FCM token is invalid', {
+          cause: new Error(),
+          description: 'FCM token is invalid',
+        });
+      }
+
+      existingStudent.fcm_token = loginConfirmStudentDto.fcm_token;
+      await this.em.flush();
+    }
 
     return cookie;
   }
