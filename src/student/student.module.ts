@@ -23,6 +23,6 @@ import { EmailModule } from 'src/email/email.module';
     EmailModule,
   ],
   controllers: [StudentController],
-  providers: [StudentService],
+  providers: [StudentService, ConfigService],
 })
 export class StudentModule {}

@@ -11,6 +11,7 @@ import { RolesGuard } from './roles.guard';
 import { StudentService } from '../student/student.service';
 import { EmailService } from '../email/email.service';
 import { Student } from '../student/entities/student.entity';
+import { S2SGuardStudent } from './s2s.student.guard';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { Student } from '../student/entities/student.entity';
     JwtStrategy,
     ConfigService,
     S2SGuard,
+    S2SGuardStudent,
     UserService,
     StudentService,
     EmailService,

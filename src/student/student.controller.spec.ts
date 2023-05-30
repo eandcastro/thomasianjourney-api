@@ -4,6 +4,7 @@ import { StudentService } from './student.service';
 import { getRepositoryToken } from '@mikro-orm/nestjs';
 import { Student } from './entities/student.entity';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 describe('StudentController', () => {
   let controller: StudentController;
@@ -25,6 +26,7 @@ describe('StudentController', () => {
           provide: getRepositoryToken(Student),
           useFactory: jest.fn(),
         },
+        ConfigService,
       ],
     })
       .overrideProvider(StudentService)

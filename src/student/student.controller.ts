@@ -15,10 +15,11 @@ import { LoginStudentDto } from './dto/login-student.dto';
 import { LoginConfirmStudentDto } from './dto/login-confirm-student.dto';
 import { Roles } from '../auth/roles.decorator';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
 import { RolesGuard } from '../auth/roles.guard';
 import { SignupStudentDto } from './dto/signup-student.dto';
 import { SignupConfirmStudentDto } from './dto/signup-confirm-student.dto';
+import { S2SGuardStudent } from '../auth/s2s.student.guard';
 
 @Controller('student')
 export class StudentController {
@@ -30,6 +31,11 @@ export class StudentController {
   }
 
   @Post('sign-up')
+  @ApiHeader({
+    name: 'x-tj-student-api-security-token',
+    description: 'A custom security token to ensure the origin of the request',
+  })
+  @UseGuards(S2SGuardStudent)
   signUp(@Body() signupStudentDto: SignupStudentDto) {
     return this.studentService.signUp(signupStudentDto);
   }
