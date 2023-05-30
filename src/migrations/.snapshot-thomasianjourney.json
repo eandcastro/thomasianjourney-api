@@ -59,6 +59,15 @@
           ],
           "mappedType": "enum"
         },
+        "fcm_token": {
+          "name": "fcm_token",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "string"
+        },
         "student_name": {
           "name": "student_name",
           "type": "varchar(255)",
@@ -75,6 +84,15 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
+          "mappedType": "string"
+        },
+        "otp": {
+          "name": "otp",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
           "mappedType": "string"
         },
         "student_college_name": {
@@ -117,6 +135,33 @@
       "name": "student",
       "schema": "public",
       "indexes": [
+        {
+          "columnNames": [
+            "fcm_token"
+          ],
+          "composite": false,
+          "keyName": "student_fcm_token_unique",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": [
+            "student_email"
+          ],
+          "composite": false,
+          "keyName": "student_student_email_unique",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": [
+            "student_mobile_number"
+          ],
+          "composite": false,
+          "keyName": "student_student_mobile_number_unique",
+          "primary": false,
+          "unique": true
+        },
         {
           "keyName": "student_pkey",
           "columnNames": [
@@ -184,6 +229,15 @@
             "student"
           ],
           "mappedType": "enum"
+        },
+        "fcm_token": {
+          "name": "fcm_token",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "string"
         },
         "first_name": {
           "name": "first_name",
@@ -261,6 +315,15 @@
       "name": "user",
       "schema": "public",
       "indexes": [
+        {
+          "columnNames": [
+            "fcm_token"
+          ],
+          "composite": false,
+          "keyName": "user_fcm_token_unique",
+          "primary": false,
+          "unique": true
+        },
         {
           "columnNames": [
             "email"

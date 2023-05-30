@@ -7,16 +7,26 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { UserService } from '../user/user.service';
 import { TokenPayload } from '../user/user.types';
 import { JwtService } from '@nestjs/jwt';
+import { StudentService } from '../student/student.service';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   private readonly logger = new Logger(JwtStrategy.name);
   private readonly userService = new UserService(this.entity, this.jwtService);
+  private readonly studentService = new StudentService(
+    this.entity,
+    this.jwtService,
+    this.emailService,
+  );
   constructor(
     private readonly configService: ConfigService,
     private readonly entity: EntityManager,
     private readonly jwtService: JwtService,
+    private emailService: EmailService,
   ) {
+    console.log(`${configService.get('JWT_SECRET')}`);
+    console.log(`${ExtractJwt.fromAuthHeaderAsBearerToken()}`);
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: configService.get('JWT_SECRET'),
@@ -29,17 +39,18 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     );
     switch (payload.role) {
       case 'admin':
-        return this.userService.findOne(payload.user_id, {
+        return this.userService.findOne(payload.id, {
           role: payload.role,
         });
       case 'superadmin':
-        return this.userService.findOne(payload.user_id, {
+        return this.userService.findOne(payload.id, {
           role: payload.role,
         });
       // TODO: implement jwt service in student service
       case 'student':
-        return this.userService.findOne(payload.user_id, {
+        return this.studentService.findOne(payload.id, {
           role: payload.role,
+          fcm_token: payload.fcm_token,
         });
       default:
         return null;

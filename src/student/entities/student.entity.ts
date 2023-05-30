@@ -6,8 +6,11 @@ export class Student extends BaseUser {
   @Property()
   student_name!: string;
 
-  @Property()
+  @Property({ unique: true })
   student_email!: string;
+
+  @Property({ nullable: true, hidden: true })
+  otp?: string;
 
   @Property()
   student_college_name!: string;
@@ -15,7 +18,7 @@ export class Student extends BaseUser {
   @Property()
   student_year_level!: number;
 
-  @Property()
+  @Property({ unique: true })
   student_mobile_number!: string;
 
   @Property()

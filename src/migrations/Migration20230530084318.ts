@@ -1,11 +1,15 @@
 import { Migration } from '@mikro-orm/migrations';
 
-export class Migration20230529151732 extends Migration {
+export class Migration20230530084318 extends Migration {
 
   async up(): Promise<void> {
-    this.addSql('create table "student" ("id" uuid not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "deleted_at" timestamptz(0) null, "role" text check ("role" in (\'admin\', \'superadmin\', \'student\')) not null, "student_name" varchar(255) not null, "student_email" varchar(255) not null, "student_college_name" varchar(255) not null, "student_year_level" int not null, "student_mobile_number" varchar(255) not null, "student_accumulated_points" int not null, constraint "student_pkey" primary key ("id"));');
+    this.addSql('create table "student" ("id" uuid not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "deleted_at" timestamptz(0) null, "role" text check ("role" in (\'admin\', \'superadmin\', \'student\')) not null, "fcm_token" varchar(255) null, "student_name" varchar(255) not null, "student_email" varchar(255) not null, "otp" varchar(255) null, "student_college_name" varchar(255) not null, "student_year_level" int not null, "student_mobile_number" varchar(255) not null, "student_accumulated_points" int not null, constraint "student_pkey" primary key ("id"));');
+    this.addSql('alter table "student" add constraint "student_fcm_token_unique" unique ("fcm_token");');
+    this.addSql('alter table "student" add constraint "student_student_email_unique" unique ("student_email");');
+    this.addSql('alter table "student" add constraint "student_student_mobile_number_unique" unique ("student_mobile_number");');
 
-    this.addSql('create table "user" ("id" uuid not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "deleted_at" timestamptz(0) null, "role" text check ("role" in (\'admin\', \'superadmin\', \'student\')) not null, "first_name" varchar(255) not null, "last_name" varchar(255) not null, "email" varchar(255) not null, "username" varchar(255) not null, "password" varchar(255) not null, "office" varchar(255) not null, "contact_person_first_name" varchar(255) not null, "contact_person_last_name" varchar(255) not null, constraint "user_pkey" primary key ("id"));');
+    this.addSql('create table "user" ("id" uuid not null, "created_at" timestamptz(0) not null, "updated_at" timestamptz(0) not null, "deleted_at" timestamptz(0) null, "role" text check ("role" in (\'admin\', \'superadmin\', \'student\')) not null, "fcm_token" varchar(255) null, "first_name" varchar(255) not null, "last_name" varchar(255) not null, "email" varchar(255) not null, "username" varchar(255) not null, "password" varchar(255) not null, "office" varchar(255) not null, "contact_person_first_name" varchar(255) not null, "contact_person_last_name" varchar(255) not null, constraint "user_pkey" primary key ("id"));');
+    this.addSql('alter table "user" add constraint "user_fcm_token_unique" unique ("fcm_token");');
     this.addSql('alter table "user" add constraint "user_email_unique" unique ("email");');
     this.addSql('alter table "user" add constraint "user_username_unique" unique ("username");');
 

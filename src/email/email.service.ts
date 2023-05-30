@@ -32,4 +32,24 @@ export class EmailService {
       this.logger.error(`Error with sending email ${JSON.stringify(error)}`);
     }
   }
+
+  async sendOtp(email: string, otp: string) {
+    try {
+      const emailResponse = await this.mailerService.sendMail({
+        to: email,
+        // from: '"Support Team" <support@example.com>', // override default from
+        subject: 'UST - Student OTP',
+        template: './send-student-otp', // `.hbs` extension is appended automatically
+        context: {
+          otp,
+        },
+      });
+
+      this.logger.log(
+        `Succesfully sent email: ${JSON.stringify(emailResponse)}`,
+      );
+    } catch (error) {
+      this.logger.error(`Error with sending email ${JSON.stringify(error)}`);
+    }
+  }
 }

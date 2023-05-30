@@ -8,10 +8,13 @@ import { JwtStrategy } from './jwt.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { S2SGuard } from './s2s.guard';
 import { RolesGuard } from './roles.guard';
+import { StudentService } from '../student/student.service';
+import { EmailService } from '../email/email.service';
+import { Student } from '../student/entities/student.entity';
 
 @Module({
   imports: [
-    MikroOrmModule.forFeature([User]),
+    MikroOrmModule.forFeature([User, Student]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -24,7 +27,15 @@ import { RolesGuard } from './roles.guard';
       }),
     }),
   ],
-  providers: [JwtStrategy, ConfigService, S2SGuard, UserService, RolesGuard],
+  providers: [
+    JwtStrategy,
+    ConfigService,
+    S2SGuard,
+    UserService,
+    StudentService,
+    EmailService,
+    RolesGuard,
+  ],
   exports: [PassportModule],
 })
 export class AuthModule {}

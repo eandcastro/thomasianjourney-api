@@ -177,7 +177,7 @@ export class UserService {
   }
 
   async getCookieWithJwtToken(user_id: string, role: string) {
-    const payload: TokenPayload = { user_id, role };
+    const payload: TokenPayload = { id: user_id, role, fcm_token: '' };
     const token = this.jwtService.sign(payload);
 
     // TODO: return token in response headers instead of response body
