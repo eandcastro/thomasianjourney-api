@@ -1,4 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import fs from 'fs/promises';
+import { Readable } from 'stream';
 import QrCode from 'qrcode';
 import { validate as uuidValidate, version as uuidVersion } from 'uuid';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -12,19 +14,20 @@ import { AttendeesService } from '../attendees/attendees.service';
 import { ConfigService } from '@nestjs/config';
 import { S3 } from 'aws-sdk';
 import { EmailService } from '../email/email.service';
-import fs from 'fs/promises';
+import { ReportsService } from '../reports/reports.service';
 
 @Injectable()
 export class EventService {
   private readonly logger = new Logger(EventService.name);
   private readonly attendeeService = new AttendeesService(this.em);
-  // private readonly emailService = new EmailService();
+  private readonly s3 = new S3();
   constructor(
     // @InjectRepository(Event)
     // private readonly eventRepository: EntityRepository<Event>, // private readonly orm: MikroORM,
     private readonly em: EntityManager,
     private readonly configService: ConfigService,
     private emailService: EmailService,
+    private readonly reportsService: ReportsService,
   ) {}
 
   async create(
@@ -83,7 +86,8 @@ export class EventService {
     const createdEvent = await this.em.upsert(createEvent);
     await this.em.flush();
 
-    await this.uploadEventQrCode(createEvent.id, createdEvent.event_name);
+    const qrCodeFilename = `${createdEvent.id}${createdEvent.event_name}-qr.png`;
+    await this.uploadEventQrCode(createEvent.id, qrCodeFilename);
 
     const uploadedImage = await this.uploadFile(
       imageBuffer,
@@ -97,7 +101,7 @@ export class EventService {
 
     // TODO: add rollback here if it fails
     wrap(createdEvent).assign({
-      event_qr: `${createdEvent.event_name}.png`,
+      event_qr: qrCodeFilename,
       event_image: filename,
     });
     await this.em.persistAndFlush(createdEvent);
@@ -140,8 +144,7 @@ export class EventService {
   }
 
   async uploadFile(dataBuffer: Buffer, filename: string, event_id: string) {
-    const s3 = new S3();
-    const uploadResult = await s3
+    const uploadResult = await this.s3
       .upload({
         Bucket: this.configService.get<string>('AWS_BUCKET_NAME'),
         Body: dataBuffer,
@@ -159,7 +162,7 @@ export class EventService {
 
   async findOne(id: string, where: FilterQuery<Event> = {}) {
     if (!uuidValidate(id) || uuidVersion(id) !== 4) {
-      throw new BadRequestException('Invalid event ID', {
+      throw new BadRequestException(`Invalid event ID`, {
         cause: new Error(),
         description: 'Event ID is not a v4 uuid',
       });
@@ -170,7 +173,7 @@ export class EventService {
     const existingEvent = await this.em.findOne(
       Event,
       Object.assign({}, where, { id }),
-      { filters: [] },
+      { filters: ['active'] },
     );
 
     if (!existingEvent) {
@@ -223,7 +226,7 @@ export class EventService {
     return this.em.remove(existingEvent).flush();
   }
 
-  async testEmail(event_name: string, broadcast_message) {
+  async testEmail(event_name: string, broadcast_message: string) {
     this.emailService.sendNewEventNotification(
       'eanj.dcastro@gmail.com',
       event_name,
@@ -232,24 +235,17 @@ export class EventService {
     );
   }
 
-  async uploadEventQrCode(event_id: string, event_name: string) {
-    const filename = `${event_id}${event_name}-qr.png`;
+  async uploadEventQrCode(event_id: string, filename: string) {
     await QrCode.toFile(
-      `${__dirname}/temp/${filename}`,
+      `${__dirname}/temp-upload/${filename}`,
       `${JSON.stringify({
         event_id,
       })}`,
-      {
-        color: {
-          dark: '#FFFFFF',
-          light: '#0000',
-        },
-      },
     );
 
-    const buffer = await fs.readFile(`${__dirname}/temp/${filename}`);
+    const buffer = await fs.readFile(`${__dirname}/temp-upload/${filename}`);
     await this.uploadFile(buffer, filename, event_id);
-    await fs.unlink(`${__dirname}/temp/${filename}`);
+    await fs.unlink(`${__dirname}/temp-upload/${filename}`);
   }
 
   // THIS IS FOR TESTING PURPOSES ONLY
@@ -259,17 +255,56 @@ export class EventService {
       `${JSON.stringify({
         event_name,
       })}`,
-      {
-        color: {
-          dark: '#FFFFFF', // Blue dots
-          light: '#0000', // Transparent background
-        },
-      },
+      // {
+      //   color: {
+      //     dark: '#FFFFFF', // Blue dots
+      //     light: '#0000', // Transparent background
+      //   },
+      // },
     );
 
-    const text = await fs.readFile(`${__dirname}/temp/${event_name}.png`);
+    const text = await fs.readFile(
+      `${__dirname}/temp-upload/${event_name}.png`,
+    );
 
     await this.uploadFile(text, `${event_name}.png`, 'abc');
-    await fs.unlink(`${__dirname}/temp/${event_name}.png`);
+    await fs.unlink(`${__dirname}/temp-upload/${event_name}.png`);
+  }
+
+  timeout(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async generateQrDocument(
+    event_id: string,
+  ): Promise<{ id: string; pdf_file_path: string }> {
+    const existingEvent = await this.findOne(event_id);
+
+    const response = await this.s3
+      .getObject({
+        Bucket: this.configService.get<string>('AWS_BUCKET_NAME'),
+        Key: `${existingEvent.id}/${existingEvent.event_qr}`,
+      })
+      .promise();
+
+    const stream = Readable.from(response.Body as Buffer);
+    await fs.writeFile(
+      `${__dirname}/temp-download/${existingEvent.event_qr}`,
+      stream,
+    );
+
+    await this.reportsService.createEventPdf(
+      existingEvent.id,
+      existingEvent.event_name,
+      `${__dirname}/temp-download/${existingEvent.event_qr}`,
+      `${__dirname}/temp-download`,
+    );
+
+    await fs.unlink(`${__dirname}/temp-download/${existingEvent.event_qr}`);
+
+    return {
+      id: existingEvent.id,
+      pdf_file_path: `${__dirname}/temp-download/${existingEvent.id}-qr_doc.pdf`,
+    };
   }
 }

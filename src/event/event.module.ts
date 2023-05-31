@@ -8,7 +8,8 @@ import { User } from '../user/entities/user.entity';
 import { Student } from '../student/entities/student.entity';
 import { StudentModule } from '../student/student.module';
 import { ConfigModule } from '@nestjs/config';
-import { EmailModule } from 'src/email/email.module';
+import { EmailModule } from '../email/email.module';
+import { ReportsService } from 'src/reports/reports.service';
 
 @Module({
   imports: [
@@ -19,6 +20,6 @@ import { EmailModule } from 'src/email/email.module';
     EmailModule,
   ],
   controllers: [EventController],
-  providers: [EventService],
+  providers: [EventService, ReportsService],
 })
 export class EventModule {}

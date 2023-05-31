@@ -29,14 +29,18 @@ async function bootstrap() {
   });
 
   // This will serve as the temp folder for qr code
-  const folderName = `${__dirname}/event/temp`;
+  const uploadFolderName = `${__dirname}/event/temp-upload`;
+  const downloadFolderName = `${__dirname}/event/temp-download`;
 
   try {
-    const dirExists = await fs.stat(folderName);
-    dirExists.isDirectory();
+    const uploadDirExists = await fs.stat(uploadFolderName);
+    const downloadDirExists = await fs.stat(downloadFolderName);
+    uploadDirExists.isDirectory();
+    downloadDirExists.isDirectory();
   } catch (error) {
     if (error.code == 'ENOENT') {
-      await fs.mkdir(folderName);
+      await fs.mkdir(uploadFolderName);
+      await fs.mkdir(downloadFolderName);
     }
   }
 

@@ -8,6 +8,9 @@ import {
   Delete,
   UseInterceptors,
   UploadedFile,
+  Query,
+  Res,
+  BadRequestException,
 } from '@nestjs/common';
 import { EventService } from './event.service';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -16,8 +19,15 @@ import { EntityTransformInterceptor } from '../utils/entity_transform.intercepto
 import { Event } from './entities/event.entity';
 import { EventResponse } from './types';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOkResponse,
+  ApiProduces,
+} from '@nestjs/swagger';
 import { TestDTO } from './dto/test-data.dto';
+import fs from 'fs/promises';
+import { Response } from 'express';
 
 @Controller('event')
 export class EventController {
@@ -131,5 +141,35 @@ export class EventController {
   @Post('/test-qr')
   testQrCode(@Body() createEventDto: TestDTO) {
     return this.eventService.testQrCode(createEventDto.event_name);
+  }
+
+  @ApiOkResponse({
+    schema: {
+      type: 'string',
+      format: 'binary',
+    },
+  })
+  @ApiProduces('application/pdf')
+  @Post('/generate/qr-doc')
+  async generateQrDocument(
+    @Query('event_id') event_id: string,
+    @Res() response: Response,
+  ) {
+    try {
+      const result = await this.eventService.generateQrDocument(event_id);
+
+      const file = await fs.readFile(result.pdf_file_path);
+
+      response.contentType('application/pdf');
+      response.attachment(`${result.id}-qr.pdf`);
+      response.send(file);
+
+      await fs.unlink(result.pdf_file_path);
+    } catch (error) {
+      throw new BadRequestException(error, {
+        cause: new Error(),
+        description: 'Error occurred while generating qr document',
+      });
+    }
   }
 }
