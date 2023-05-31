@@ -94,6 +94,7 @@ export class EventService {
     const createdEvent = await this.em.upsert(createEvent);
     await this.em.flush();
 
+    // Generate and upload qr code to S3 bucket
     const qrCodeFilename = `${createdEvent.id}${createdEvent.event_name}-qr.png`;
     await this.uploadEventQrCode(createEvent.id, qrCodeFilename);
 
