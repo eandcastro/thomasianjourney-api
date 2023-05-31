@@ -28,6 +28,7 @@ import {
 import { TestDTO } from './dto/test-data.dto';
 import fs from 'fs/promises';
 import { Response } from 'express';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Controller('event')
 export class EventController {
@@ -171,5 +172,11 @@ export class EventController {
         description: 'Error occurred while generating qr document',
       });
     }
+  }
+
+  // This cron job will automate updating event status to ONGOING or DONE
+  @Cron(CronExpression.EVERY_30_SECONDS)
+  async handleEventCron() {
+    await this.eventService.handleEventCron();
   }
 }

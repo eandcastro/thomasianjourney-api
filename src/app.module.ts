@@ -11,6 +11,7 @@ import { AttendeesModule } from './attendees/attendees.module';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
 import { ReportsModule } from './reports/reports.module';
+import { ScheduleModule } from '@nestjs/schedule';
 @Module({
   imports: [
     MikroOrmModule.forRoot(mikroOrmConfig),
@@ -18,6 +19,8 @@ import { ReportsModule } from './reports/reports.module';
     ConfigModule.forRoot({
       ignoreEnvFile: false,
     }),
+    // This will be used for cron jobs/task scheduling
+    ScheduleModule.forRoot(),
     UserModule,
     EventModule,
     StudentModule,

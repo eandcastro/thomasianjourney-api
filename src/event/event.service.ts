@@ -7,7 +7,12 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { Event } from './entities/event.entity';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { FilterQuery, wrap } from '@mikro-orm/core';
+import {
+  FilterQuery,
+  MikroORM,
+  UseRequestContext,
+  wrap,
+} from '@mikro-orm/core';
 import { User } from '../user/entities/user.entity';
 import { Student } from '../student/entities/student.entity';
 import { AttendeesService } from '../attendees/attendees.service';
@@ -23,7 +28,10 @@ export class EventService {
   private readonly s3 = new S3();
   constructor(
     // @InjectRepository(Event)
-    // private readonly eventRepository: EntityRepository<Event>, // private readonly orm: MikroORM,
+    // private readonly eventRepository: EntityRepository<Event>,
+
+    // orm is being used in @UseRequestContext()
+    private readonly orm: MikroORM,
     private readonly em: EntityManager,
     private readonly configService: ConfigService,
     private emailService: EmailService,
@@ -306,5 +314,58 @@ export class EventService {
       id: existingEvent.id,
       pdf_file_path: `${__dirname}/temp-download/${existingEvent.id}-qr_doc.pdf`,
     };
+  }
+
+  // We can use the @UseRequestContext() decorator. It requires us to first inject the MikroORM instance to current context,
+  // it will be then used to create the context for us.
+  // Under the hood, the decorator will register new request context for our method and execute it inside the context.
+  // This decorator will wrap the underlying method in RequestContext.createAsync() call.
+  // Every call to such method will create new context (new EntityManager fork) which will be used inside.
+  @UseRequestContext()
+  async handleEventCron() {
+    //  ValidationError: Using global EntityManager instance methods for context specific actions is disallowed, USE getContext() instead
+
+    this.logger.debug(`Running cron job for event status update >`);
+    const events = await this.em
+      .getContext()
+      .find(
+        Event,
+        { $and: [{ event_status: { $in: ['UPCOMING', 'ONGOING'] } }] },
+        { filters: ['active'] },
+      );
+
+    this.logger.log(`Getting all events: ${JSON.stringify(events)}`);
+
+    const currentDateTime = new Date().getTime();
+    for (let i = 0; i < events.length; i++) {
+      if (events[i].event_status === 'UPCOMING') {
+        const startDateTimeStamp = new Date(
+          events[i].event_start_date,
+        ).getTime();
+        if (currentDateTime >= startDateTimeStamp) {
+          this.logger.log(`Event ${events[i].id}: Start Date is done.`);
+          const event = await this.em
+            .getContext()
+            .findOne(Event, { id: events[i].id }, {});
+
+          this.logger.log(`Getting event: ${JSON.stringify(events[i])}`);
+          event.event_status = 'ONGOING';
+          await this.em.getContext().flush();
+        }
+      }
+
+      if (events[i].event_status === 'ONGOING') {
+        const endDateTimeStamp = new Date(events[i].event_end_date).getTime();
+        if (currentDateTime >= endDateTimeStamp) {
+          this.logger.log(`Event ${events[i].id}: End Date is done.`);
+          const event = await this.em
+            .getContext()
+            .findOne(Event, { id: events[i].id }, {});
+
+          event.event_status = 'DONE';
+          await this.em.getContext().flush();
+        }
+      }
+    }
   }
 }
