@@ -19,15 +19,41 @@ export class AttendeesService {
   async create(createAttendeeDto: CreateAttendeeDto) {
     const newAttendee = new Attendee();
 
-    newAttendee.student = this.em.getReference(
-      Student,
-      createAttendeeDto.student_id,
-    );
-    newAttendee.event = this.em.getReference(Event, createAttendeeDto.event_id);
+    const student: Student = await this.em.findOne(Student, {
+      id: createAttendeeDto.student_id,
+    });
+    const event: Event = await this.em.findOne(Event, {
+      id: createAttendeeDto.event_id,
+    });
 
     this.logger.log(`Creating new attendee: ${JSON.stringify(newAttendee)}`);
 
-    const createAttendee = this.em.create(Event, newAttendee);
+    if (!student || !event) {
+      this.logger.error(`Student or event not existing`);
+
+      throw new BadRequestException('Student or Event does not exists', {
+        cause: new Error(),
+        description: 'Student/Event ID does not exists',
+      });
+    }
+
+    newAttendee.student = student;
+    newAttendee.event = event;
+    const where: FilterQuery<Attendee> = {
+      event: newAttendee.event,
+      student: newAttendee.student,
+    };
+
+    const existingAttendee = await this.em.findOne(Attendee, where, {});
+
+    if (existingAttendee) {
+      throw new BadRequestException('Attendee has already been created', {
+        cause: new Error(),
+        description: 'Created attendee already',
+      });
+    }
+
+    const createAttendee = this.em.create(Attendee, newAttendee);
     const attendee = await this.em.upsert(createAttendee);
     await this.em.flush();
 
@@ -62,7 +88,7 @@ export class AttendeesService {
       {},
     );
 
-    if (existingAttendee.has_attended) {
+    if (existingAttendee.has_attended.toString() === 'true') {
       throw new BadRequestException('Attendee has already attended the event', {
         cause: new Error(),
         description: 'Attended already',
