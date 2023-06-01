@@ -56,6 +56,11 @@ export class AttendeesService {
     };
 
     const existingAttendee = await this.em.findOne(Attendee, where, {});
+    const existingEvent = await this.em.findOne(
+      Event,
+      { id: event.id, event_status: 'ONGOING' },
+      {},
+    );
 
     if (existingAttendee.has_attended) {
       throw new BadRequestException('Attendee has already attended the event', {
@@ -64,12 +69,27 @@ export class AttendeesService {
       });
     }
 
+    if (!existingEvent) {
+      throw new BadRequestException('Event is either upcoming or cancelled', {
+        cause: new Error(),
+        description: 'Event is either upcoming or cancelled',
+      });
+    }
+
     existingAttendee.has_attended = true;
     await this.em.flush();
 
-    const existingEvent = await this.em.findOne(Event, { id: event.id }, {});
-
     existingEvent.event_attendee_count = existingEvent.event_attendee_count + 1;
+    await this.em.flush();
+
+    const existingStudent = await this.em.findOne(
+      Student,
+      { id: student.id },
+      {},
+    );
+
+    existingStudent.student_accumulated_points =
+      existingStudent.student_accumulated_points + existingEvent.event_points;
     await this.em.flush();
 
     this.logger.log(

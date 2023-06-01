@@ -40,8 +40,8 @@ export class EventService {
 
   async create(
     createEventDto: CreateEventDto,
-    imageBuffer: Buffer,
-    filename: string,
+    imageBuffer?: Buffer,
+    filename?: string,
   ) {
     const newEvent = new Event();
 
@@ -67,11 +67,13 @@ export class EventService {
       });
 
     newEvent.event_name = createEventDto.event_name;
-    newEvent.event_start_date = new Date();
-    newEvent.event_end_date = new Date();
+    newEvent.event_start_date = new Date(createEventDto.event_start_date);
+    newEvent.event_end_date = new Date(createEventDto.event_end_date);
     newEvent.event_description = createEventDto.event_description;
     newEvent.event_status = 'UPCOMING';
-    newEvent.event_image = filename;
+    newEvent.event_image =
+      filename ||
+      'https://tj-static-images.s3.ap-southeast-1.amazonaws.com/UST.jpg';
     newEvent.event_qr = createEventDto.event_name;
     newEvent.event_venue = createEventDto.event_venue;
     newEvent.event_lead_office = createEventDto.event_lead_office;
@@ -98,20 +100,21 @@ export class EventService {
     const qrCodeFilename = `${createdEvent.id}${createdEvent.event_name}-qr.png`;
     await this.uploadEventQrCode(createEvent.id, qrCodeFilename);
 
-    const uploadedImage = await this.uploadFile(
-      imageBuffer,
-      filename,
-      createdEvent.id,
-    );
+    if (imageBuffer && filename) {
+      const uploadedImage = await this.uploadFile(
+        imageBuffer,
+        filename,
+        createdEvent.id,
+      );
 
-    if (!uploadedImage) {
-      this.logger.log(`Failed to upload: ${JSON.stringify(uploadedImage)} `);
+      if (!uploadedImage) {
+        this.logger.log(`Failed to upload: ${JSON.stringify(uploadedImage)} `);
+      }
     }
 
     // TODO: add rollback here if it fails
     wrap(createdEvent).assign({
       event_qr: qrCodeFilename,
-      event_image: filename,
     });
     await this.em.persistAndFlush(createdEvent);
 
@@ -326,7 +329,7 @@ export class EventService {
   async handleEventCron() {
     //  ValidationError: Using global EntityManager instance methods for context specific actions is disallowed, USE getContext() instead
 
-    this.logger.debug(`Running cron job for event status update >`);
+    this.logger.debug(`[CRON] Running cron job for event status update >`);
     const events = await this.em
       .getContext()
       .find(

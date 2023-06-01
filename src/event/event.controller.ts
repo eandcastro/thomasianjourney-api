@@ -86,18 +86,26 @@ export class EventController {
         event_points: {
           type: 'number',
         },
+        event_start_date: {
+          type: 'string',
+          format: 'date-time',
+        },
+        event_end_date: {
+          type: 'string',
+          format: 'date-time',
+        },
       },
     },
   })
   @UseInterceptors(FileInterceptor('file'))
   create(
     @Body() createEventDto: CreateEventDto,
-    @UploadedFile() file: Express.MulterS3.File,
+    @UploadedFile() file?: Express.MulterS3.File,
   ) {
     return this.eventService.create(
       createEventDto,
-      file.buffer,
-      file.originalname,
+      file?.buffer,
+      file?.originalname,
     );
   }
 

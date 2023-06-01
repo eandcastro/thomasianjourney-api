@@ -1,6 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsDate,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  MinDate,
+} from 'class-validator';
 // import { Metadata } from './metadata.dto';
 
 export class CreateEventDto {
@@ -62,6 +69,18 @@ export class CreateEventDto {
   @Type(() => Number)
   @ApiProperty({ required: true })
   event_points: number;
+
+  @IsNotEmpty()
+  @Transform(({ value }) => new Date(value))
+  @IsDate()
+  @MinDate(new Date())
+  event_start_date: Date;
+
+  @IsNotEmpty()
+  @Transform(({ value }) => new Date(value))
+  @IsDate()
+  @MinDate(new Date())
+  event_end_date: Date;
 
   // @IsNotEmpty()
   // @ValidateNested()
