@@ -266,6 +266,26 @@ export class StudentService {
     return existingStudent;
   }
 
+  async softRemove(id: string) {
+    const existingStudent = await this.em.findOne(
+      Student,
+      { id },
+      { filters: ['active'] },
+    );
+
+    if (!existingStudent) {
+      throw new BadRequestException('User ID does not exists', {
+        cause: new Error(),
+        description: 'User ID does not exists',
+      });
+    }
+
+    existingStudent.deleted_at = new Date();
+    await this.em.flush();
+
+    return existingStudent;
+  }
+
   remove(id: string) {
     return this.em.remove(this.em.getReference(Student, id)).flush();
   }

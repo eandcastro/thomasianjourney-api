@@ -75,6 +75,11 @@ export class StudentController {
     return this.studentService.update(id, updateStudentDto);
   }
 
+  @Delete('/soft-delete/:id')
+  softRemove(@Param('id') id: string) {
+    return this.studentService.softRemove(id);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.studentService.remove(id);
