@@ -17,7 +17,6 @@ export class LoginConfirmStudentDto {
   @ApiProperty({ required: true })
   fcm_token: string;
 
-  @IsNotEmpty()
   @IsBoolean()
   @ApiProperty()
   is_new_sso?: boolean;

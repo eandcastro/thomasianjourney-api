@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateAttendeeDto {
   @IsNotEmpty()
@@ -11,4 +11,8 @@ export class CreateAttendeeDto {
   @IsString()
   @ApiProperty({ required: true })
   event_id: string;
+
+  @IsBoolean()
+  @ApiProperty()
+  has_attended?: boolean;
 }

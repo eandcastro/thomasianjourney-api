@@ -3,9 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
   UseInterceptors,
   Query,
 } from '@nestjs/common';
@@ -42,15 +40,5 @@ export class AttendeesController {
   @Get(':event_id')
   findOne(@Param('event_id') event_id: string) {
     return this.attendeesService.findEventAttendees(event_id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string) {
-    return this.attendeesService.update(+id);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.attendeesService.remove(+id);
   }
 }

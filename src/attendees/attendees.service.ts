@@ -39,6 +39,8 @@ export class AttendeesService {
 
     newAttendee.student = student;
     newAttendee.event = event;
+    newAttendee.has_attended = createAttendeeDto.has_attended || false;
+
     const where: FilterQuery<Attendee> = {
       event: newAttendee.event,
       student: newAttendee.student,
@@ -108,11 +110,7 @@ export class AttendeesService {
     existingEvent.event_attendee_count = existingEvent.event_attendee_count + 1;
     await this.em.flush();
 
-    const existingStudent = await this.em.findOne(
-      Student,
-      { id: student.id },
-      {},
-    );
+    const existingStudent = await this.em.findOne(Student, { id: student.id });
 
     existingStudent.student_accumulated_points =
       existingStudent.student_accumulated_points + existingEvent.event_points;
@@ -131,7 +129,22 @@ export class AttendeesService {
 
   // Find attendees by event
   async findEventAttendees(event_id: string) {
-    const event = this.em.getReference(Event, event_id);
+    const event: Event = await this.em.findOne(Event, {
+      id: event_id,
+      $and: [{ event_status: { $in: ['ONGOING', 'DONE'] } }],
+    });
+
+    if (!event) {
+      this.logger.error(`Event is not existing or has not yet started`);
+
+      throw new BadRequestException(
+        'Event is not existing or has not yet started',
+        {
+          cause: new Error(),
+          description: 'Event is not existing or has not yet started',
+        },
+      );
+    }
 
     const where: FilterQuery<Attendee> = {
       event,
@@ -148,13 +161,5 @@ export class AttendeesService {
     });
 
     return { ...eventAttendees, count: eventAttendeesCount };
-  }
-
-  update(id: number) {
-    return `This action updates a #${id} attendee`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} attendee`;
   }
 }
