@@ -173,4 +173,34 @@ export class AttendeesService {
 
     return { ...eventAttendees, count: eventAttendeesCount };
   }
+
+  async findEventsByAttendee(student_id: string) {
+    const student: Student = await this.em.findOne(
+      Student,
+      {
+        id: student_id,
+      },
+      { filters: ['active'] },
+    );
+
+    if (!student) {
+      this.logger.error(`Student is not existing.`);
+
+      throw new BadRequestException('Student is not existing', {
+        cause: new Error(),
+        description: 'Student is not existing',
+      });
+    }
+
+    const where: FilterQuery<Attendee> = {
+      student,
+    };
+
+    const eventsByAttendee = await this.em.find(Attendee, where, {
+      filters: ['active'],
+      populate: ['event'],
+    });
+
+    return eventsByAttendee;
+  }
 }

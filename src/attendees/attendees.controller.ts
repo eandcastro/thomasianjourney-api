@@ -32,13 +32,22 @@ export class AttendeesController {
     return this.attendeesService.attendEvent(event_id, student_id);
   }
 
+  // This will be used by the admin
   @Get()
   findAll() {
     return this.attendeesService.findAll();
   }
 
-  @Get(':event_id')
-  findOne(@Param('event_id') event_id: string) {
+  // This will be used by the admin for getting attendees for an event
+  @Get('event/:event_id')
+  findEventAttendees(@Param('event_id') event_id: string) {
     return this.attendeesService.findEventAttendees(event_id);
+  }
+
+  // This will be used by the student for getting events assigned to him/her
+  @Get('student/:student_id')
+  findEventsByAttendee(@Param('student_id') student_id: string) {
+    console.log('HEREEE', student_id);
+    return this.attendeesService.findEventsByAttendee(student_id);
   }
 }
