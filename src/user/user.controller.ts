@@ -20,6 +20,8 @@ import { AuthGuard } from '@nestjs/passport';
 import { S2SGuard } from '../auth/s2s.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('user')
 export class UserController {
@@ -45,6 +47,26 @@ export class UserController {
   @Post('login')
   login(@Body() loginUserDto: LoginUserDto) {
     return this.userService.login(loginUserDto);
+  }
+
+  @ApiHeader({
+    name: 'x-tj-api-security-token',
+    description: 'A custom security token to ensure the origin of the request',
+  })
+  @UseGuards(S2SGuard)
+  @Post('forgot-password')
+  forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.userService.forgotPassword(forgotPasswordDto);
+  }
+
+  @ApiHeader({
+    name: 'x-tj-api-security-token',
+    description: 'A custom security token to ensure the origin of the request',
+  })
+  @UseGuards(S2SGuard)
+  @Post('reset-password')
+  resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.userService.resetPassword(resetPasswordDto);
   }
 
   @Get()

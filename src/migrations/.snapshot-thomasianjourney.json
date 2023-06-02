@@ -320,6 +320,15 @@
           "primary": false,
           "nullable": false,
           "mappedType": "string"
+        },
+        "temporary_password": {
+          "name": "temporary_password",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "string"
         }
       },
       "name": "user",

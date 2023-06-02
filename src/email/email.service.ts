@@ -52,4 +52,25 @@ export class EmailService {
       this.logger.error(`Error with sending email ${JSON.stringify(error)}`);
     }
   }
+
+  async sendResetPassword(email: string, otp: string) {
+    try {
+      // TODO: update email context to use frontend url with otp on the url path
+      const emailResponse = await this.mailerService.sendMail({
+        to: email,
+        // from: '"Support Team" <support@example.com>', // override default from
+        subject: 'UST - Reset Password',
+        template: './send-student-otp', // `.hbs` extension is appended automatically
+        context: {
+          otp,
+        },
+      });
+
+      this.logger.log(
+        `Succesfully sent email: ${JSON.stringify(emailResponse)}`,
+      );
+    } catch (error) {
+      this.logger.error(`Error with sending email ${JSON.stringify(error)}`);
+    }
+  }
 }

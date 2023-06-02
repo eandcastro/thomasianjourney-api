@@ -9,6 +9,9 @@ import { FilterQuery, wrap } from '@mikro-orm/core';
 import { LoginUserDto } from './dto/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { TokenPayload } from './user.types';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class UserService {
@@ -19,6 +22,7 @@ export class UserService {
     // private readonly userRepository: EntityRepository<User>, // private readonly orm: MikroORM,
     private readonly em: EntityManager,
     private readonly jwtService: JwtService,
+    private emailService: EmailService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -174,6 +178,74 @@ export class UserService {
       existingUser.role,
     );
     return cookie;
+  }
+
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
+    const existingUser = await this.em.findOne(
+      User,
+      { username: forgotPasswordDto.username },
+      { filters: ['active'] },
+    );
+
+    if (!existingUser) {
+      throw new BadRequestException('User ID does not exists', {
+        cause: new Error(),
+        description: 'User ID does not exists',
+      });
+    }
+
+    // Generate otp to be sent in email
+    const otp = await this.generateOtp();
+
+    // Save otp as temporary password
+    existingUser.temporary_password = otp;
+    await this.em.flush();
+
+    // Send email for reset password
+    await this.emailService.sendResetPassword(existingUser.email, otp);
+
+    // TODO: remove this once email is working
+    return { email: existingUser.email, otp };
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    this.logger.log(`Resetting password ${JSON.stringify(resetPasswordDto)}`);
+
+    const existingUser = await this.em.findOne(
+      User,
+      { temporary_password: resetPasswordDto.token },
+      { filters: ['active'] },
+    );
+
+    if (!existingUser) {
+      throw new BadRequestException('User does not exists', {
+        cause: new Error(),
+        description: 'User does not exists',
+      });
+    }
+
+    if (resetPasswordDto.new_password !== resetPasswordDto.confirm_password) {
+      throw new BadRequestException(
+        'Confirm password does not match with new password',
+        {
+          cause: new Error(),
+          description: 'Passwords do not match',
+        },
+      );
+    }
+
+    // Generating hash for new password of user
+    const hashedPassword = await bcrypt.hash(resetPasswordDto.new_password, 15);
+
+    existingUser.temporary_password = null;
+    existingUser.password = hashedPassword;
+    await this.em.flush();
+
+    return existingUser;
+  }
+
+  async generateOtp() {
+    return Math.random().toString(36).substr(2, 20);
   }
 
   async getCookieWithJwtToken(user_id: string, role: string) {

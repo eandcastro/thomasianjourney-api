@@ -26,4 +26,7 @@ export class User extends BaseUser {
 
   @Property()
   contact_person_last_name!: string;
+
+  @Property({ nullable: true, hidden: true })
+  temporary_password?: string;
 }

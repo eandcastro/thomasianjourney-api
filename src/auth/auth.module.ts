@@ -35,6 +35,7 @@ import { S2SGuardStudent } from './s2s.student.guard';
     S2SGuardStudent,
     UserService,
     StudentService,
+    // TODO: remove this email service and figure out why error when removing this
     EmailService,
     RolesGuard,
   ],

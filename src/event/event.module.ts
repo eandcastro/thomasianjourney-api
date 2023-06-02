@@ -9,7 +9,8 @@ import { Student } from '../student/entities/student.entity';
 import { StudentModule } from '../student/student.module';
 import { ConfigModule } from '@nestjs/config';
 import { EmailModule } from '../email/email.module';
-import { ReportsService } from 'src/reports/reports.service';
+// import { ReportsService } from '../reports/reports.service';
+import { ReportsModule } from 'src/reports/reports.module';
 
 @Module({
   imports: [
@@ -18,8 +19,9 @@ import { ReportsService } from 'src/reports/reports.service';
     StudentModule,
     ConfigModule,
     EmailModule,
+    ReportsModule,
   ],
   controllers: [EventController],
-  providers: [EventService, ReportsService],
+  providers: [EventService],
 })
 export class EventModule {}
