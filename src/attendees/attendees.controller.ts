@@ -34,18 +34,21 @@ export class AttendeesController {
 
   // This will be used by the admin
   @Get()
+  @UseInterceptors(EntityTransformInterceptor<Attendee, AttendeeResponse>)
   findAll() {
     return this.attendeesService.findAll();
   }
 
   // This will be used by the admin for getting attendees for an event
   @Get('event/:event_id')
+  @UseInterceptors(EntityTransformInterceptor<Attendee, AttendeeResponse>)
   findEventAttendees(@Param('event_id') event_id: string) {
     return this.attendeesService.findEventAttendees(event_id);
   }
 
   // This will be used by the student for getting events assigned to him/her
   @Get('student/:student_id')
+  @UseInterceptors(EntityTransformInterceptor<Attendee, AttendeeResponse>)
   findEventsByAttendee(@Param('student_id') student_id: string) {
     console.log('HEREEE', student_id);
     return this.attendeesService.findEventsByAttendee(student_id);
