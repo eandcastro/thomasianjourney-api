@@ -6,15 +6,11 @@ import { Attendee } from './entities/attendee.entity';
 import { User } from '../user/entities/user.entity';
 import { UserModule } from '../user/user.module';
 import { Event } from '../event/entities/event.entity';
-import { EventModule } from '../event/event.module';
 
 @Module({
-  imports: [
-    MikroOrmModule.forFeature([Attendee, User, Event]),
-    UserModule,
-    EventModule,
-  ],
+  imports: [MikroOrmModule.forFeature([Attendee, User, Event]), UserModule],
   controllers: [AttendeesController],
   providers: [AttendeesService],
+  exports: [AttendeesService],
 })
 export class AttendeesModule {}

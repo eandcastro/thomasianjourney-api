@@ -24,7 +24,7 @@ import { ReportsService } from '../reports/reports.service';
 @Injectable()
 export class EventService {
   private readonly logger = new Logger(EventService.name);
-  private readonly attendeeService = new AttendeesService(this.em);
+  // private readonly attendeeService = new AttendeesService(this.em);
   private readonly s3 = new S3();
   constructor(
     // @InjectRepository(Event)
@@ -36,6 +36,7 @@ export class EventService {
     private readonly configService: ConfigService,
     private emailService: EmailService,
     private readonly reportsService: ReportsService,
+    private readonly attendeesService: AttendeesService,
   ) {}
 
   async create(
@@ -135,7 +136,7 @@ export class EventService {
         }
 
         existingStudents.map((existingStudent) => {
-          this.attendeeService.create({
+          this.attendeesService.create({
             event_id: createEvent.id,
             student_id: existingStudent.id,
           });

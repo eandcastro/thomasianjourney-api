@@ -45,6 +45,8 @@ export class StudentController {
     return this.studentService.signUpConfirm(signUpConfirmStudentDto);
   }
 
+  // This can be used for login and resend otp for now
+  // TODO: Add expiration time for OTP
   @Post('login/send-otp')
   loginSendOtp(@Body() loginStudentDto: LoginStudentDto) {
     return this.studentService.login(loginStudentDto);
@@ -53,12 +55,6 @@ export class StudentController {
   @Post('login/confirm')
   loginConfirm(@Body() loginConfirmStudentDto: LoginConfirmStudentDto) {
     return this.studentService.loginConfirm(loginConfirmStudentDto);
-  }
-
-  // TODO: make resend otp
-  @Post('resend-otp')
-  resendOtp(@Body() loginStudentDto: LoginStudentDto) {
-    return this.studentService.login(loginStudentDto);
   }
 
   // TODO: Specify which endpoints are for students only

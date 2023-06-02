@@ -76,6 +76,7 @@ export class CreateEventDto {
   @MinDate(new Date())
   event_start_date: Date;
 
+  // TODO: make event_start_date as the min date for event_end_date
   @IsNotEmpty()
   @Transform(({ value }) => new Date(value))
   @IsDate()

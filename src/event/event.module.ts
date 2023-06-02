@@ -11,6 +11,7 @@ import { ConfigModule } from '@nestjs/config';
 import { EmailModule } from '../email/email.module';
 // import { ReportsService } from '../reports/reports.service';
 import { ReportsModule } from 'src/reports/reports.module';
+import { AttendeesModule } from 'src/attendees/attendees.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ReportsModule } from 'src/reports/reports.module';
     ConfigModule,
     EmailModule,
     ReportsModule,
+    AttendeesModule,
   ],
   controllers: [EventController],
   providers: [EventService],
