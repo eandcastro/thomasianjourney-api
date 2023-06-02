@@ -53,6 +53,26 @@ export class EmailService {
     }
   }
 
+  async sendCancelledEventEmail(email: string, event_name: string) {
+    try {
+      const emailResponse = await this.mailerService.sendMail({
+        to: email,
+        // from: '"Support Team" <support@example.com>', // override default from
+        subject: 'UST - Event Announcement',
+        template: './cancelled-event', // `.hbs` extension is appended automatically
+        context: {
+          event_name,
+        },
+      });
+
+      this.logger.log(
+        `Succesfully sent email: ${JSON.stringify(emailResponse)}`,
+      );
+    } catch (error) {
+      this.logger.error(`Error with sending email ${JSON.stringify(error)}`);
+    }
+  }
+
   async sendResetPassword(email: string, otp: string) {
     try {
       // TODO: update email context to use frontend url with otp on the url path

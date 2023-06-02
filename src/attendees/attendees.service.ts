@@ -63,8 +63,17 @@ export class AttendeesService {
   }
 
   async attendEvent(event_id: string, student_id: string) {
-    const student = this.em.getReference(Student, student_id);
-    const event = this.em.getReference(Event, event_id);
+    const student: Student = await this.em.findOne(Student, {
+      id: student_id,
+    });
+    const event: Event = await this.em.findOne(
+      Event,
+      {
+        id: event_id,
+        event_status: 'ONGOING',
+      },
+      { filters: ['active'] },
+    );
 
     if (!student || !event) {
       this.logger.error(
@@ -83,12 +92,14 @@ export class AttendeesService {
       student,
     };
 
-    const existingAttendee = await this.em.findOne(Attendee, where, {});
-    const existingEvent = await this.em.findOne(
-      Event,
-      { id: event.id, event_status: 'ONGOING' },
-      {},
-    );
+    const existingAttendee = await this.em.findOne(Attendee, where, {
+      filters: ['active'],
+    });
+    // const existingEvent = await this.em.findOne(
+    //   Event,
+    //   { id: event.id, event_status: 'ONGOING' },
+    //   { filters: ['active'] },
+    // );
 
     if (existingAttendee.has_attended.toString() === 'true') {
       throw new BadRequestException('Attendee has already attended the event', {
@@ -97,7 +108,7 @@ export class AttendeesService {
       });
     }
 
-    if (!existingEvent) {
+    if (!event) {
       throw new BadRequestException('Event is either upcoming or cancelled', {
         cause: new Error(),
         description: 'Event is either upcoming or cancelled',
@@ -107,13 +118,13 @@ export class AttendeesService {
     existingAttendee.has_attended = true;
     await this.em.flush();
 
-    existingEvent.event_attendee_count = existingEvent.event_attendee_count + 1;
+    event.event_attendee_count = event.event_attendee_count + 1;
     await this.em.flush();
 
     const existingStudent = await this.em.findOne(Student, { id: student.id });
 
     existingStudent.student_accumulated_points =
-      existingStudent.student_accumulated_points + existingEvent.event_points;
+      existingStudent.student_accumulated_points + event.event_points;
     await this.em.flush();
 
     this.logger.log(

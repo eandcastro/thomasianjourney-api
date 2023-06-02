@@ -202,20 +202,44 @@ export class EventService {
   // TODO: aside from updating event, also update or remove attendees for this event
   async update(id: string, updateEventDto: UpdateEventDto) {
     if (!uuidValidate(id) || uuidVersion(id) !== 4) {
-      throw new BadRequestException('Invalid student ID', {
+      throw new BadRequestException('Invalid event ID', {
         cause: new Error(),
-        description: 'Student ID is not a v4 uuid',
+        description: 'Event ID is not a v4 uuid',
       });
     }
 
     this.logger.log(`Updating Event ID: ${id}`);
 
-    const existingEvent = await this.em.findOne(Event, { id }, {});
+    const existingEvent = await this.em.findOne(
+      Event,
+      { id, $and: [{ event_status: { $in: ['UPCOMING', 'ONGOING'] } }] },
+      { filters: ['active'] },
+    );
 
     if (!existingEvent) {
       throw new BadRequestException('Event ID does not exists', {
         cause: new Error(),
         description: 'Event ID does not exists',
+      });
+    }
+
+    if (
+      existingEvent.event_status === 'ONGOING' &&
+      updateEventDto.event_status === 'UPCOMING'
+    ) {
+      throw new BadRequestException('Event is already ongoing.', {
+        cause: new Error(),
+        description: 'Event is already ongoing.',
+      });
+    }
+
+    if (updateEventDto.event_status === 'CANCELLED') {
+      existingEvent.event_grouped_emails.map(async (grouped_email: string) => {
+        this.logger.log(`Sending email to: ${grouped_email}`);
+        await this.emailService.sendCancelledEventEmail(
+          grouped_email,
+          existingEvent.event_name,
+        );
       });
     }
 
@@ -226,6 +250,26 @@ export class EventService {
   }
 
   // TODO: aside from removing event, also remove attendees for this event
+  async softRemove(id: string) {
+    const existingEvent = await this.em.findOne(
+      Event,
+      { id },
+      { filters: ['active'] },
+    );
+
+    if (!existingEvent) {
+      throw new BadRequestException('User ID does not exists', {
+        cause: new Error(),
+        description: 'User ID does not exists',
+      });
+    }
+
+    existingEvent.deleted_at = new Date();
+    await this.em.flush();
+
+    return existingEvent;
+  }
+
   async remove(id: string) {
     const existingEvent = this.em.getReference(Event, id);
 
