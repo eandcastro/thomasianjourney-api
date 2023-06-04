@@ -455,12 +455,18 @@
         },
         "event_status": {
           "name": "event_status",
-          "type": "varchar(255)",
+          "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "mappedType": "string"
+          "enumItems": [
+            "UPCOMING",
+            "ONGOING",
+            "DONE",
+            "CANCELLED"
+          ],
+          "mappedType": "enum"
         },
         "event_image": {
           "name": "event_image",
@@ -473,12 +479,12 @@
         },
         "event_qr": {
           "name": "event_qr",
-          "type": "varchar(3000)",
+          "type": "varchar(500)",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "length": 3000,
+          "length": 500,
           "mappedType": "string"
         },
         "event_venue": {

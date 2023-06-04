@@ -392,7 +392,7 @@ export class EventService {
           events[i].event_start_date,
         ).getTime();
         if (currentDateTime >= startDateTimeStamp) {
-          this.logger.log(`Event ${events[i].id}: Start Date is done.`);
+          this.logger.log(`Event ${events[i].id} has started.`);
           const event = await this.em
             .getContext()
             .findOne(Event, { id: events[i].id }, {});
@@ -406,7 +406,7 @@ export class EventService {
       if (events[i].event_status === 'ONGOING') {
         const endDateTimeStamp = new Date(events[i].event_end_date).getTime();
         if (currentDateTime >= endDateTimeStamp) {
-          this.logger.log(`Event ${events[i].id}: End Date is done.`);
+          this.logger.log(`Event ${events[i].id} is done.`);
           const event = await this.em
             .getContext()
             .findOne(Event, { id: events[i].id }, {});

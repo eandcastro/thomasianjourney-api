@@ -66,6 +66,7 @@ export class StudentController {
     return this.studentService.findAll();
   }
 
+  // TODO: add find me endpoint
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.studentService.findOne(id);
@@ -77,11 +78,17 @@ export class StudentController {
   }
 
   @Delete('/soft-delete/:id')
+  @ApiBearerAuth()
+  @Roles('admin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   softRemove(@Param('id') id: string) {
     return this.studentService.softRemove(id);
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @Roles('admin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   remove(@Param('id') id: string) {
     return this.studentService.remove(id);
   }

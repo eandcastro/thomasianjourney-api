@@ -1,4 +1,10 @@
-import { DateTimeType, Entity, ManyToOne, Property } from '@mikro-orm/core';
+import {
+  DateTimeType,
+  Entity,
+  Enum,
+  ManyToOne,
+  Property,
+} from '@mikro-orm/core';
 import { BaseEntity } from '../../base.entity';
 import { User } from '../../user/entities/user.entity';
 
@@ -16,14 +22,13 @@ export class Event extends BaseEntity {
   @Property()
   event_description!: string;
 
-  // TODO: make this enum
-  @Property()
+  @Enum(() => EventStatus)
   event_status!: string;
 
   @Property()
   event_image!: string;
 
-  @Property({ length: 3000 })
+  @Property({ length: 500 })
   event_qr!: string;
 
   @Property()
@@ -60,4 +65,11 @@ export class Event extends BaseEntity {
 
   @Property()
   event_points!: number;
+}
+
+export enum EventStatus {
+  UPCOMING = 'UPCOMING',
+  ONGOING = 'ONGOING',
+  DONE = 'DONE',
+  CANCELLED = 'CANCELLED',
 }

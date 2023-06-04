@@ -131,14 +131,6 @@ export class EventController {
     return this.eventService.remove(id);
   }
 
-  // @Post('/attendee')
-  // createEventAttendee(
-  //   @Query('event_id') event_id: string,
-  //   @Query('student_id') student_id: string,
-  // ) {
-  //   return this.eventService.attendEvent(event_id, student_id);
-  // }
-
   @Post('/test-email')
   createEventAttendee(@Body() createEventDto: CreateEventDto) {
     return this.eventService.testEmail(
