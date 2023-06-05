@@ -12,6 +12,7 @@ import { StudentService } from '../student/student.service';
 import { EmailService } from '../email/email.service';
 import { Student } from '../student/entities/student.entity';
 import { S2SGuardStudent } from './s2s.student.guard';
+import { AttendeesService } from '../attendees/attendees.service';
 
 @Module({
   imports: [
@@ -35,7 +36,7 @@ import { S2SGuardStudent } from './s2s.student.guard';
     S2SGuardStudent,
     UserService,
     StudentService,
-    // TODO: remove this email service and figure out why error when removing this
+    AttendeesService,
     EmailService,
     RolesGuard,
   ],

@@ -13,6 +13,7 @@ import { EmailService } from '../email/email.service';
 import { LoginConfirmStudentDto } from './dto/login-confirm-student.dto';
 import { SignupStudentDto } from './dto/signup-student.dto';
 import { SignupConfirmStudentDto } from './dto/signup-confirm-student.dto';
+import { AttendeesService } from '../attendees/attendees.service';
 
 @Injectable()
 export class StudentService {
@@ -23,6 +24,7 @@ export class StudentService {
     private readonly em: EntityManager,
     private readonly jwtService: JwtService,
     private emailService: EmailService,
+    private attendeeService: AttendeesService,
   ) {}
 
   async create(createStudentDto: CreateStudentDto) {
@@ -205,6 +207,22 @@ export class StudentService {
 
       existingStudent.fcm_token = loginConfirmStudentDto.fcm_token;
       await this.em.flush();
+    }
+
+    // Creating attendee entity to assign the event/s to the student, this is to ensure attendee entity for the student when the student has not yet signed up after the event has been created
+    const yearLevel = `${existingStudent.student_year_level.toString()}`;
+    const eventsByAttendee = await this.em.execute(
+      `SELECT * from Event WHERE ? = ANY (event_year_level_attendee) AND ? = ANY(event_college_attendee)`,
+      [yearLevel, existingStudent.student_college_name],
+    );
+
+    if (eventsByAttendee.length > 0) {
+      for (const eventByAttendee of eventsByAttendee) {
+        await this.attendeeService.createAttendeeOnLoginConfirm(
+          eventByAttendee.id,
+          existingStudent.id,
+        );
+      }
     }
 
     return cookie;

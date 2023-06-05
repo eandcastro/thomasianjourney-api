@@ -93,6 +93,7 @@ export class StudentController {
     return this.studentService.findOne(id);
   }
 
+  // This is for students to get their own profile
   @Get('me')
   @ApiBearerAuth()
   @Roles('student')
@@ -102,6 +103,7 @@ export class StudentController {
     return this.studentService.findOne(user.id);
   }
 
+  // This is for students to update their own profile
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateStudentDto: UpdateStudentDto) {
     return this.studentService.update(id, updateStudentDto);

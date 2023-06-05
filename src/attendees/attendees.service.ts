@@ -203,4 +203,47 @@ export class AttendeesService {
 
     return eventsByAttendee;
   }
+
+  // This is called on student login confirm to create an attendee entity if the attendee entity was not created during creation of event
+  async createAttendeeOnLoginConfirm(event_id: string, student_id: string) {
+    const student: Student = await this.em.findOne(Student, {
+      id: student_id,
+    });
+    const event: Event = await this.em.findOne(
+      Event,
+      {
+        id: event_id,
+      },
+      { filters: ['active'] },
+    );
+
+    const existingAttendee = await this.em.findOne(
+      Attendee,
+      { event, student },
+      {
+        filters: ['active'],
+      },
+    );
+
+    if (!existingAttendee) {
+      const newAttendee = new Attendee();
+
+      newAttendee.student = student;
+      newAttendee.event = event;
+      newAttendee.has_attended = false;
+
+      const createAttendee = this.em.create(Attendee, newAttendee);
+      const attendee = await this.em.upsert(createAttendee);
+      await this.em.flush();
+
+      return {
+        isExisting: false,
+        ...attendee,
+      };
+    }
+
+    return {
+      isExisting: true,
+    };
+  }
 }
