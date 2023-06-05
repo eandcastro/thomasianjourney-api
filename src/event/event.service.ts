@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import fs from 'fs/promises';
 import { Readable } from 'stream';
 import QrCode from 'qrcode';
@@ -20,11 +25,11 @@ import { ConfigService } from '@nestjs/config';
 import { S3 } from 'aws-sdk';
 import { EmailService } from '../email/email.service';
 import { ReportsService } from '../reports/reports.service';
+import { Attendee } from '../attendees/entities/attendee.entity';
 
 @Injectable()
 export class EventService {
   private readonly logger = new Logger(EventService.name);
-  // private readonly attendeeService = new AttendeesService(this.em);
   private readonly s3 = new S3();
   constructor(
     // @InjectRepository(Event)
@@ -217,7 +222,7 @@ export class EventService {
     );
 
     if (!existingEvent) {
-      throw new BadRequestException('Event ID does not exists', {
+      throw new NotFoundException('Event ID does not exists', {
         cause: new Error(),
         description: 'Event ID does not exists',
       });
@@ -241,6 +246,16 @@ export class EventService {
           existingEvent.event_name,
         );
       });
+
+      const studentAttendees = await this.em.find(Attendee, {
+        event: existingEvent,
+      });
+
+      for (const student of studentAttendees) {
+        student.has_attended = false;
+      }
+
+      await this.em.flush();
     }
 
     wrap(existingEvent).assign(updateEventDto);

@@ -11,6 +11,7 @@ import {
   Query,
   Res,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { EventService } from './event.service';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -20,6 +21,7 @@ import { Event } from './entities/event.entity';
 import { EventResponse } from './types';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiOkResponse,
@@ -29,6 +31,9 @@ import { TestDTO } from './dto/test-data.dto';
 import fs from 'fs/promises';
 import { Response } from 'express';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { Roles } from '../auth/roles.decorator';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from '../auth/roles.guard';
 
 @Controller('event')
 export class EventController {
@@ -36,6 +41,9 @@ export class EventController {
 
   @ApiConsumes('multipart/form-data')
   @Post()
+  @ApiBearerAuth()
+  @Roles('admin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @ApiBody({
     schema: {
       type: 'object',
@@ -110,23 +118,35 @@ export class EventController {
   }
 
   @Get()
+  @ApiBearerAuth()
+  @Roles('admin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @UseInterceptors(EntityTransformInterceptor<Event, EventResponse>)
   findAll() {
     return this.eventService.findAll();
   }
 
   @Get(':id')
+  @ApiBearerAuth()
+  @Roles('admin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @UseInterceptors(EntityTransformInterceptor<Event, EventResponse>)
   findOne(@Param('id') id: string) {
     return this.eventService.findOne(id);
   }
 
   @Patch(':id')
+  @ApiBearerAuth()
+  @Roles('admin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
     return this.eventService.update(id, updateEventDto);
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @Roles('admin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   remove(@Param('id') id: string) {
     return this.eventService.remove(id);
   }
@@ -152,6 +172,9 @@ export class EventController {
   })
   @ApiProduces('application/pdf')
   @Post('/generate/qr-doc')
+  @ApiBearerAuth()
+  @Roles('admin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   async generateQrDocument(
     @Query('event_id') event_id: string,
     @Res() response: Response,

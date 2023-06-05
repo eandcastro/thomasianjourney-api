@@ -9,9 +9,8 @@ import { Student } from '../student/entities/student.entity';
 import { StudentModule } from '../student/student.module';
 import { ConfigModule } from '@nestjs/config';
 import { EmailModule } from '../email/email.module';
-// import { ReportsService } from '../reports/reports.service';
-import { ReportsModule } from 'src/reports/reports.module';
-import { AttendeesModule } from 'src/attendees/attendees.module';
+import { ReportsModule } from '../reports/reports.module';
+import { AttendeesModule } from '../attendees/attendees.module';
 
 @Module({
   imports: [

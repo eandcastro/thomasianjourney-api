@@ -6,12 +6,17 @@ import {
   Param,
   UseInterceptors,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { AttendeesService } from './attendees.service';
 import { CreateAttendeeDto } from './dto/create-attendee.dto';
 import { EntityTransformInterceptor } from '../utils/entity_transform.interceptor';
 import { Attendee } from './entities/attendee.entity';
 import { AttendeeResponse } from './types';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { Roles } from '../auth/roles.decorator';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from '../auth/roles.guard';
 
 @Controller('attendees')
 export class AttendeesController {
@@ -34,6 +39,9 @@ export class AttendeesController {
 
   // This will be used by the admin
   @Get()
+  @ApiBearerAuth()
+  @Roles('admin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @UseInterceptors(EntityTransformInterceptor<Attendee, AttendeeResponse>)
   findAll() {
     return this.attendeesService.findAll();
@@ -41,6 +49,9 @@ export class AttendeesController {
 
   // This will be used by the admin for getting attendees for an event
   @Get('event/:event_id')
+  @ApiBearerAuth()
+  @Roles('admin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @UseInterceptors(EntityTransformInterceptor<Attendee, AttendeeResponse>)
   findEventAttendees(@Param('event_id') event_id: string) {
     return this.attendeesService.findEventAttendees(event_id);
