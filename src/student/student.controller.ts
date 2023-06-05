@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { StudentService } from './student.service';
 import { CreateStudentDto } from './dto/create-student.dto';
@@ -24,15 +25,17 @@ import { S2SGuardStudent } from '../auth/s2s.student.guard';
 @Controller('student')
 export class StudentController {
   constructor(private readonly studentService: StudentService) {}
-  // TODO: Specify which endpoints require public security token
   @Post()
+  @ApiBearerAuth()
+  @Roles('admin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   create(@Body() createStudentDto: CreateStudentDto) {
     return this.studentService.create(createStudentDto);
   }
 
   @Post('sign-up')
   @ApiHeader({
-    name: 'x-tj-student-api-security-token',
+    name: 'x-student-tj-api-security-token',
     description: 'A custom security token to ensure the origin of the request',
   })
   @UseGuards(S2SGuardStudent)
@@ -41,6 +44,11 @@ export class StudentController {
   }
 
   @Post('sign-up/confirm')
+  @ApiHeader({
+    name: 'x-student-tj-api-security-token',
+    description: 'A custom security token to ensure the origin of the request',
+  })
+  @UseGuards(S2SGuardStudent)
   signUpConfirm(@Body() signUpConfirmStudentDto: SignupConfirmStudentDto) {
     return this.studentService.signUpConfirm(signUpConfirmStudentDto);
   }
@@ -48,10 +56,20 @@ export class StudentController {
   // This can be used for login and resend otp for now
   // TODO: Add expiration time for OTP
   @Post('login/send-otp')
+  @ApiHeader({
+    name: 'x-student-tj-api-security-token',
+    description: 'A custom security token to ensure the origin of the request',
+  })
+  @UseGuards(S2SGuardStudent)
   loginSendOtp(@Body() loginStudentDto: LoginStudentDto) {
     return this.studentService.login(loginStudentDto);
   }
 
+  @ApiHeader({
+    name: 'x-student-tj-api-security-token',
+    description: 'A custom security token to ensure the origin of the request',
+  })
+  @UseGuards(S2SGuardStudent)
   @Post('login/confirm')
   loginConfirm(@Body() loginConfirmStudentDto: LoginConfirmStudentDto) {
     return this.studentService.loginConfirm(loginConfirmStudentDto);
@@ -60,16 +78,28 @@ export class StudentController {
   // TODO: Specify which endpoints are for students only
   @Get()
   @ApiBearerAuth()
-  @Roles('student')
+  @Roles('admin')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   findAll() {
     return this.studentService.findAll();
   }
 
-  // TODO: add find me endpoint
-  @Get(':id')
+  // This is for admin users to fetch student profile
+  @Get('admin/:id')
+  @ApiBearerAuth()
+  @Roles('admin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   findOne(@Param('id') id: string) {
     return this.studentService.findOne(id);
+  }
+
+  @Get('me')
+  @ApiBearerAuth()
+  @Roles('student')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  getStudentProfile(@Req() req: any) {
+    const { user } = req;
+    return this.studentService.findOne(user.id);
   }
 
   @Patch(':id')

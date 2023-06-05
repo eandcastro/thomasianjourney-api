@@ -14,10 +14,6 @@ export class ReportsService {
     console.log('Creating event pdf doc...');
     const pdfDoc = await PDFDocument.create();
 
-    // const qr_code_image = await fetch(event_qr).then((res) =>
-    //   res.arrayBuffer(),
-    // );
-
     const imageBuffer = await fs.readFile(`${file_path}`);
 
     const pngImage = await pdfDoc.embedPng(imageBuffer);

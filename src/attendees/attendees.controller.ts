@@ -61,7 +61,6 @@ export class AttendeesController {
   @Get('student/:student_id')
   @UseInterceptors(EntityTransformInterceptor<Attendee, AttendeeResponse>)
   findEventsByAttendee(@Param('student_id') student_id: string) {
-    console.log('HEREEE', student_id);
     return this.attendeesService.findEventsByAttendee(student_id);
   }
 }
