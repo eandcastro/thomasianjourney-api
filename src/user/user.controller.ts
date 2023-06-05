@@ -27,8 +27,6 @@ import { ResetPasswordDto } from './dto/reset-password.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // TODO: add create superadmin user endpoint, this existing endpoint below is for create admin
-  // MAKE A SEPARATE SECURITY TOKEN FOR BOTH ENDPOINTS
   @ApiHeader({
     name: 'x-tj-api-security-token',
     description: 'A custom security token to ensure the origin of the request',
@@ -82,7 +80,8 @@ export class UserController {
 
   @Get(':id')
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @Roles('admin', 'superadmin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   findOne(@Param() params: GetUserDto, @Query() query: GetAllUserDto) {
     return this.userService.findOne(params.id, {
       role: query.role,
@@ -92,21 +91,24 @@ export class UserController {
 
   @Patch(':id')
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @Roles('admin', 'superadmin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(id, updateUserDto);
   }
 
   @Delete('/soft-delete/:id')
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @Roles('superadmin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   softRemove(@Param('id') id: string) {
     return this.userService.softRemove(id);
   }
 
   @Delete(':id')
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @Roles('superadmin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
   }
