@@ -398,7 +398,7 @@ export class EventService {
         { filters: ['active'] },
       );
 
-    this.logger.log(`Getting all events: ${JSON.stringify(events)}`);
+    this.logger.debug(`[CRON] Getting all events: ${JSON.stringify(events)}`);
 
     const currentDateTime = new Date().getTime();
     for (let i = 0; i < events.length; i++) {
@@ -407,27 +407,32 @@ export class EventService {
           events[i].event_start_date,
         ).getTime();
         if (currentDateTime >= startDateTimeStamp) {
-          this.logger.log(`Event ${events[i].id} has started.`);
           const event = await this.em
             .getContext()
             .findOne(Event, { id: events[i].id }, {});
 
-          this.logger.log(`Getting event: ${JSON.stringify(events[i])}`);
           event.event_status = 'ONGOING';
           await this.em.getContext().flush();
+
+          this.logger.debug(
+            `[CRON] Event has started: ${JSON.stringify(events[i])}`,
+          );
         }
       }
 
       if (events[i].event_status === 'ONGOING') {
         const endDateTimeStamp = new Date(events[i].event_end_date).getTime();
         if (currentDateTime >= endDateTimeStamp) {
-          this.logger.log(`Event ${events[i].id} is done.`);
           const event = await this.em
             .getContext()
             .findOne(Event, { id: events[i].id }, {});
 
           event.event_status = 'DONE';
           await this.em.getContext().flush();
+
+          this.logger.debug(
+            `[CRON] Event is done: ${JSON.stringify(events[i])}`,
+          );
         }
       }
     }

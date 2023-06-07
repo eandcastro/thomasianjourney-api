@@ -86,7 +86,6 @@ export class AttendeesService {
       });
     }
 
-    // TODO: check if you can query by has_attended = "false"
     const where: FilterQuery<Attendee> = {
       event,
       student,
@@ -95,11 +94,6 @@ export class AttendeesService {
     const existingAttendee = await this.em.findOne(Attendee, where, {
       filters: ['active'],
     });
-    // const existingEvent = await this.em.findOne(
-    //   Event,
-    //   { id: event.id, event_status: 'ONGOING' },
-    //   { filters: ['active'] },
-    // );
 
     if (existingAttendee.has_attended.toString() === 'true') {
       throw new BadRequestException('Attendee has already attended the event', {
