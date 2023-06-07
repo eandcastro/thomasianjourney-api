@@ -59,8 +59,12 @@ export class UserService {
     }
   }
 
-  async findAll(where: FilterQuery<User> = {}, filters: string[] = []) {
-    const users = await this.em.find(User, where, { filters });
+  // TODO: add where query here
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async findAll(where: FilterQuery<User> = {}, filters: string[] = ['active']) {
+    const users = await this.em.find(User, {}, { filters });
+
+    this.logger.log(`Getting all users: ${JSON.stringify(users)}`);
     return users;
   }
 
@@ -173,11 +177,19 @@ export class UserService {
       });
     }
 
-    const cookie = this.getCookieWithJwtToken(
+    const cookie = await this.getCookieWithJwtToken(
       existingUser.id,
       existingUser.role,
     );
-    return cookie;
+
+    // return cookie;
+
+    return {
+      id: existingUser.id,
+      role: existingUser.role,
+      fcm_token: '',
+      access_token: cookie.access_token,
+    };
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {

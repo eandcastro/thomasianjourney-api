@@ -11,7 +11,7 @@ export class GetAllUserDto {
     enum: UserRole,
     example: UserRole.ADMIN,
   })
-  role: UserRole;
+  role?: UserRole;
 
   @IsOptional()
   @ApiProperty({
@@ -19,7 +19,7 @@ export class GetAllUserDto {
     nullable: true,
     example: 'CICS',
   })
-  office: string;
+  office?: string;
 
   @IsOptional()
   @ApiProperty({
@@ -27,5 +27,5 @@ export class GetAllUserDto {
     nullable: true,
     example: '["active"]',
   })
-  filters: string[];
+  filters?: string[];
 }

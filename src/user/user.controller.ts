@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -22,6 +23,9 @@ import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { EntityTransformInterceptor } from 'src/utils/entity_transform.interceptor';
+import { User } from './entities/user.entity';
+import { UserResponse } from './user.types';
 
 @Controller('user')
 export class UserController {
@@ -71,6 +75,7 @@ export class UserController {
   @ApiBearerAuth()
   @Roles('admin')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @UseInterceptors(EntityTransformInterceptor<User, UserResponse>)
   findAll(@Query() query: GetAllUserDto) {
     return this.userService.findAll(
       { role: query.role, office: query.office },

@@ -48,7 +48,7 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   // Enable CORS, Disable this when running the frontend web/mobile locally
-  app.enableCors();
+  // app.enableCors();
 
   await app.listen(3000);
 }
