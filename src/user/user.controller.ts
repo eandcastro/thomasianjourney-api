@@ -9,6 +9,7 @@ import {
   Query,
   UseGuards,
   UseInterceptors,
+  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -83,7 +84,7 @@ export class UserController {
     );
   }
 
-  @Get(':id')
+  @Get('/admin/:id')
   @ApiBearerAuth()
   @Roles('admin', 'superadmin')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -92,6 +93,16 @@ export class UserController {
       role: query.role,
       office: query.office,
     });
+  }
+
+  // This is for admin/superadmin to get their own profile
+  @Get('me')
+  @ApiBearerAuth()
+  @Roles('admin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  getStudentProfile(@Req() req: any) {
+    const { user } = req;
+    return this.userService.findOne(user.id);
   }
 
   @Patch(':id')
