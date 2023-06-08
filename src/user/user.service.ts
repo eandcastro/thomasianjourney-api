@@ -76,7 +76,7 @@ export class UserService {
     if (!uuidValidate(id) || uuidVersion(id) !== 4) {
       throw new BadRequestException('Invalid User ID', {
         cause: new Error(),
-        description: 'User ID is not a v4 uuid',
+        description: 'User ID is not a V4 uuid',
       });
     }
 
