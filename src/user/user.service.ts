@@ -59,9 +59,11 @@ export class UserService {
     }
   }
 
-  // TODO: add where query here
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async findAll(where: FilterQuery<User> = {}, filters: string[] = ['active']) {
+    // This will remove empty/nullish properties from 'where' object
+    Object.keys(where).forEach((k) => where[k] == null && delete where[k]);
+
     const users = await this.em.find(User, {}, { filters });
 
     this.logger.log(`Getting all users: ${JSON.stringify(users)}`);
@@ -81,6 +83,9 @@ export class UserService {
     }
 
     this.logger.log(`Finding User ID: ${id}`);
+
+    // This will remove empty/nullish properties from 'where' object
+    Object.keys(where).forEach((k) => where[k] == null && delete where[k]);
 
     const existingUser = await this.em.findOne(
       User,
