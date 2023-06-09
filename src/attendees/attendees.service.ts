@@ -136,7 +136,7 @@ export class AttendeesService {
   async findEventAttendees(event_id: string) {
     const event: Event = await this.em.findOne(Event, {
       id: event_id,
-      $and: [{ event_status: { $in: ['ONGOING', 'DONE'] } }],
+      // $and: [{ event_status: { $in: ['ONGOING', 'DONE'] } }],
     });
 
     if (!event) {
@@ -160,12 +160,18 @@ export class AttendeesService {
       populate: ['event', 'student'],
     });
 
-    const eventAttendeesCount = await this.em.findAndCount(Attendee, where, {
+    const attendeesCount = await this.em.count(Attendee, where, {
       filters: ['active'],
-      populate: ['event', 'student'],
     });
 
-    return { ...eventAttendees, count: eventAttendeesCount };
+    // TODO: figure out how to make the response readable as the current response for findAndCount is '0': {}, '1': 1, 1 being the count
+
+    // const eventAttendeesCount = await this.em.findAndCount(Attendee, where, {
+    //   filters: ['active'],
+    //   populate: ['event', 'student'],
+    // });
+
+    return { events: eventAttendees, count: attendeesCount };
   }
 
   async findEventsByAttendee(student_id: string) {

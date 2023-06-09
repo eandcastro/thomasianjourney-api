@@ -52,7 +52,7 @@ export class AttendeesController {
   @ApiBearerAuth()
   @Roles('admin')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @UseInterceptors(EntityTransformInterceptor<Attendee, AttendeeResponse>)
+  // @UseInterceptors(EntityTransformInterceptor<Attendee, AttendeeResponse>)
   findEventAttendees(@Param('event_id') event_id: string) {
     return this.attendeesService.findEventAttendees(event_id);
   }

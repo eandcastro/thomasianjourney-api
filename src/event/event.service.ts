@@ -174,6 +174,9 @@ export class EventService {
   }
 
   async findAll(where: FilterQuery<Event> = {}) {
+    // This will remove empty/nullish properties from 'where' object
+    Object.keys(where).forEach((k) => where[k] == null && delete where[k]);
+
     const events = await this.em.find(Event, where, { filters: ['active'] });
     return events;
   }
@@ -187,6 +190,9 @@ export class EventService {
     }
 
     this.logger.log(`Finding Event ID: ${id}`);
+
+    // This will remove empty/nullish properties from 'where' object
+    Object.keys(where).forEach((k) => where[k] == null && delete where[k]);
 
     const existingEvent = await this.em.findOne(
       Event,
